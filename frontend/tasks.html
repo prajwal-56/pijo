@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Task Board ⚡ PIJO AI Task Manager</title>
+  <title>Task Board - PIJO</title>
   <link rel="stylesheet" href="/static/css/style.css">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -23,7 +23,7 @@
             PIJO
           </div>
         </a>
-        <div class="sidebar-badge">⚡ AI Task Manager</div>
+        <div class="sidebar-badge">Task Manager</div>
       </div>
 
       <nav class="nav-links">
@@ -43,7 +43,7 @@
 
       <div class="sidebar-footer">
         <div class="sidebar-sticker">
-          🤖 <strong>AI ENGINE</strong><br>
+          <strong>AI ENGINE</strong><br>
           <span style="font-size:0.7rem; font-weight:600; opacity:0.85;">Skill-weighted matching</span>
         </div>
       </div>
@@ -53,11 +53,11 @@
     <main class="main-content">
       <header class="page-header" style="flex-wrap: wrap;">
         <div>
-          <h1 class="page-title"><span class="highlight">Agile Board</span> 📋</h1>
-          <p class="page-subtitle">Interactive Kanban board with automated AI task allocation & priority scoring</p>
+          <h1 class="page-title"><span class="highlight">Agile Board</span></h1>
+          <p class="page-subtitle">Drag-and-drop Kanban board with custom workflow states and automated AI allocation</p>
         </div>
         
-        <!-- Action Toolbar -->
+        <!-- Action Toolbar (Emoji-Free) -->
         <div style="display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center;">
           <input type="file" id="csv-upload" accept=".csv" style="display:none" onchange="uploadCSV(event)">
           <button class="btn btn-yellow" onclick="document.getElementById('csv-upload').click()">
@@ -66,11 +66,14 @@
           <button class="btn btn-cyan" onclick="openAddTaskModal()">
             <i data-lucide="plus" style="width:16px; height:16px;"></i> Add Task
           </button>
-          <button class="btn btn-pink" id="btn-ai-assign" onclick="aiAssign(this)">
-            <i data-lucide="bot" style="width:16px; height:16px;"></i> 🤖 AI Assign All
+          <button class="btn btn-purple" onclick="openAddColumnModal()">
+            <i data-lucide="columns-3" style="width:16px; height:16px;"></i> Add Column
           </button>
-          <button class="btn btn-purple" id="btn-ai-prioritize" onclick="aiPrioritize(this)">
-            <i data-lucide="bar-chart-2" style="width:16px; height:16px;"></i> 📊 Prioritize
+          <button class="btn btn-pink" id="btn-ai-assign" onclick="aiAssign(this)">
+            <i data-lucide="sparkles" style="width:16px; height:16px;"></i> Auto-Assign
+          </button>
+          <button class="btn btn-yellow" id="btn-ai-prioritize" onclick="aiPrioritize(this)">
+            <i data-lucide="arrow-up-down" style="width:16px; height:16px;"></i> Prioritize
           </button>
           <button class="btn btn-danger" onclick="clearAllTasks()" title="Clear all tasks">
             <i data-lucide="trash-2" style="width:16px; height:16px;"></i>
@@ -78,9 +81,9 @@
         </div>
       </header>
 
-      <!-- Kanban 4-Column Board -->
+      <!-- Kanban Multi-Column Board (Drag and Drop + Resizable) -->
       <div class="kanban-board" id="kanban-board">
-        <!-- Injected via JavaScript -->
+        <!-- Columns dynamically injected via JavaScript -->
       </div>
     </main>
   </div>
@@ -90,9 +93,11 @@
     <div class="modal-content">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
         <h3 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 900;">
-          ➕ Add New Task
+          Add New Task
         </h3>
-        <button class="btn btn-sm btn-yellow" onclick="closeAddTaskModal()">✕</button>
+        <button class="btn btn-sm btn-yellow" onclick="closeAddTaskModal()">
+          <i data-lucide="x" style="width:14px; height:14px;"></i>
+        </button>
       </div>
       <form id="add-task-form" onsubmit="handleAddTask(event)">
         <div class="form-group">
@@ -106,10 +111,10 @@
         <div class="form-group">
           <label class="form-label">Initial Priority</label>
           <select name="priority" class="form-control">
-            <option value="low">🌱 Low</option>
-            <option value="medium" selected>🔹 Medium</option>
-            <option value="high">⚡ High</option>
-            <option value="critical">🔥 Critical</option>
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
           </select>
         </div>
         <div style="display:flex; justify-content:flex-end; gap:0.6rem; margin-top:1.5rem;">
@@ -122,24 +127,63 @@
     </div>
   </div>
 
+  <!-- Add Custom Column Modal -->
+  <div class="modal-overlay" id="add-column-modal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+        <h3 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 900;">
+          Add Custom Workflow State
+        </h3>
+        <button class="btn btn-sm btn-yellow" onclick="closeAddColumnModal()">
+          <i data-lucide="x" style="width:14px; height:14px;"></i>
+        </button>
+      </div>
+      <form id="add-column-form" onsubmit="handleAddColumn(event)">
+        <div class="form-group">
+          <label class="form-label">Column Name *</label>
+          <input type="text" id="col-label-input" class="form-control" placeholder="e.g. Dropped, In Review, QA..." required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Accent Color</label>
+          <select id="col-color-input" class="form-control">
+            <option value="purple">Purple</option>
+            <option value="pink">Pink</option>
+            <option value="cyan">Cyan</option>
+            <option value="yellow">Yellow</option>
+            <option value="green">Green</option>
+            <option value="gray">Gray</option>
+          </select>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:0.6rem; margin-top:1.5rem;">
+          <button type="button" class="btn" onclick="closeAddColumnModal()">Cancel</button>
+          <button type="submit" class="btn btn-cyan" id="btn-save-column">
+            <i data-lucide="check" style="width:16px; height:16px;"></i> Create Column
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- AI Chat Floating Button -->
   <button class="chat-widget-btn" onclick="toggleChat()" title="Open PIJO AI Chatbot">
-    <i data-lucide="bot" style="width:24px; height:24px;"></i>
+    <i data-lucide="message-square" style="width:20px; height:20px;"></i>
     <span>Ask PIJO AI</span>
   </button>
 
-  <!-- AI Chat Modal -->
+  <!-- AI Chat Modal (Resizable) -->
   <div class="chat-modal" id="chat-modal">
     <div class="chat-header">
       <div style="display:flex; align-items:center; gap:0.5rem;">
-        <span style="font-size:1.3rem;">🤖</span>
-        <span>PIJO AI Board Assistant</span>
+        <i data-lucide="bot" style="width:20px; height:20px;"></i>
+        <span>PIJO AI Assistant</span>
       </div>
-      <button onclick="toggleChat()" title="Close chat">✕</button>
+      <button onclick="toggleChat()" title="Close chat">
+        <i data-lucide="x" style="width:16px; height:16px;"></i>
+      </button>
     </div>
     <div class="chat-body" id="chat-body">
       <div class="chat-msg ai">
-        <strong>👋 Board Assistant ready!</strong>
+        <strong>Board Assistant online.</strong>
         Ask me why tasks were assigned to specific teammates or how to balance current sprint workloads.
       </div>
     </div>
@@ -157,17 +201,22 @@
   <script src="/static/js/cursor.js"></script>
   <script>
     let membersList = [];
-    
-    const columns = [
-      { id: 'todo', label: 'To Do', emoji: '🟡', class: 'col-todo' },
-      { id: 'in_progress', label: 'In Progress', emoji: '🔵', class: 'col-in_progress' },
-      { id: 'done', label: 'Done', emoji: '🟢', class: 'col-done' },
-      { id: 'blocked', label: 'Blocked', emoji: '🔴', class: 'col-blocked' }
-    ];
+    let boardColumns = [];
+    let draggedTaskId = null;
 
     async function initTasks() {
       try {
-        membersList = await API.getMembers().catch(() => []);
+        const [members, cols] = await Promise.all([
+          API.getMembers().catch(() => []),
+          API.getColumns().catch(() => [
+            { id: 'todo', label: 'To Do', color: 'yellow' },
+            { id: 'in_progress', label: 'In Progress', color: 'cyan' },
+            { id: 'done', label: 'Done', color: 'green' },
+            { id: 'blocked', label: 'Blocked', color: 'pink' }
+          ])
+        ]);
+        membersList = members;
+        boardColumns = cols;
         loadTasks();
       } catch(err) {
         showToast('Error initializing task board: ' + err.message, 'error');
@@ -179,17 +228,27 @@
       try {
         const tasks = await API.getTasks();
         
-        board.innerHTML = columns.map(col => {
+        board.innerHTML = boardColumns.map(col => {
           const colTasks = tasks.filter(t => t.status === col.id);
+          const isCustom = !['todo', 'done'].includes(col.id);
           return `
-            <div class="kanban-column ${col.class}">
+            <div class="kanban-column col-${col.id} col-custom" data-column-id="${col.id}">
               <div class="kanban-header">
-                <span>${col.emoji} ${col.label}</span>
-                <span class="badge badge-gray" style="background:#FFF;">${colTasks.length}</span>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                  <span class="status-dot dot-${col.color || 'yellow'}"></span>
+                  <span>${col.label}</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:0.4rem;">
+                  <span class="badge badge-gray" style="background:#FFF;">${colTasks.length}</span>
+                  ${isCustom ? `
+                    <button class="btn btn-sm btn-danger" style="padding:0.15rem 0.35rem; font-size:0.65rem;" onclick="deleteCustomColumn('${col.id}')" title="Delete Column">
+                      <i data-lucide="x" style="width:12px; height:12px;"></i>
+                    </button>` : ''}
+                </div>
               </div>
-              <div class="kanban-cards">
+              <div class="kanban-cards" data-column-id="${col.id}" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, '${col.id}')">
                 ${colTasks.map(t => renderTaskCard(t)).join('')}
-                ${colTasks.length === 0 ? '<div style="color:rgba(18,18,18,0.5); text-align:center; padding:2.5rem 1rem; font-weight:700; font-size:0.85rem; font-style:italic;">No tasks in this lane</div>' : ''}
+                ${colTasks.length === 0 ? '<div style="color:rgba(18,18,18,0.5); text-align:center; padding:3rem 1rem; font-weight:700; font-size:0.85rem;">Drop tasks here</div>' : ''}
               </div>
             </div>
           `;
@@ -206,22 +265,24 @@
       const assignedMember = membersList.find(m => m.id === task.assigned_to);
       
       const memberOpts = `<option value="">Unassigned</option>` + 
-        membersList.map(m => `<option value="${m.id}" ${m.id === task.assigned_to ? 'selected' : ''}>👤 ${m.name}</option>`).join('');
+        membersList.map(m => `<option value="${m.id}" ${m.id === task.assigned_to ? 'selected' : ''}>${m.name}</option>`).join('');
 
-      const statusOpts = columns.map(c => `<option value="${c.id}" ${c.id === task.status ? 'selected' : ''}>${c.emoji} ${c.label}</option>`).join('');
+      const statusOpts = boardColumns.map(c => `<option value="${c.id}" ${c.id === task.status ? 'selected' : ''}>${c.label}</option>`).join('');
 
       return `
-        <div class="task-card card-tilt">
+        <div class="task-card card-tilt" draggable="true" ondragstart="handleDragStart(event, '${task.id}')" ondragend="handleDragEnd(event)">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
             ${priorityBadge(task.priority)}
-            <button class="btn btn-sm btn-danger" style="padding:0.15rem 0.45rem; font-size:0.65rem;" onclick="deleteTask('${task.id}')" title="Delete Task">✕</button>
+            <button class="btn btn-sm btn-danger" style="padding:0.15rem 0.45rem; font-size:0.65rem;" onclick="deleteTask('${task.id}')" title="Delete Task">
+              <i data-lucide="trash-2" style="width:12px; height:12px;"></i>
+            </button>
           </div>
           <h4>${task.title}</h4>
           ${task.description ? `<p>${task.description}</p>` : ''}
           
           ${task.assigned_reason ? `
             <div class="ai-reason-bubble">
-              💡 <strong>AI Fit:</strong> ${task.assigned_reason}
+              <strong>Match Reason:</strong> ${task.assigned_reason}
             </div>` : ''}
 
           ${assignedMember ? `
@@ -248,6 +309,106 @@
       `;
     }
 
+    // =========================================================================
+    // DRAG AND DROP HANDLERS
+    // =========================================================================
+    function handleDragStart(e, taskId) {
+      draggedTaskId = taskId;
+      e.target.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', taskId);
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDragEnd(e) {
+      e.target.classList.remove('dragging');
+      document.querySelectorAll('.kanban-cards').forEach(zone => zone.classList.remove('drag-over'));
+      draggedTaskId = null;
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const zone = e.currentTarget;
+      if (!zone.classList.contains('drag-over')) {
+        zone.classList.add('drag-over');
+      }
+    }
+
+    function handleDragLeave(e) {
+      const zone = e.currentTarget;
+      zone.classList.remove('drag-over');
+    }
+
+    async function handleDrop(e, targetStatus) {
+      e.preventDefault();
+      const zone = e.currentTarget;
+      zone.classList.remove('drag-over');
+
+      const taskId = e.dataTransfer.getData('text/plain') || draggedTaskId;
+      if (!taskId) return;
+
+      try {
+        await API.updateTaskStatus(taskId, targetStatus);
+        if (targetStatus === 'done') {
+          triggerConfetti();
+        }
+        showToast(`Moved to ${targetStatus.replace(/_/g, ' ')}`, 'info');
+        loadTasks();
+      } catch (err) {
+        showToast('Failed to move task: ' + err.message, 'error');
+      }
+    }
+
+    // =========================================================================
+    // CUSTOM COLUMN MANAGEMENT
+    // =========================================================================
+    function openAddColumnModal() {
+      document.getElementById('add-column-modal').classList.add('active');
+      document.getElementById('col-label-input').focus();
+    }
+
+    function closeAddColumnModal() {
+      document.getElementById('add-column-modal').classList.remove('active');
+    }
+
+    async function handleAddColumn(e) {
+      e.preventDefault();
+      const label = document.getElementById('col-label-input').value.trim();
+      const color = document.getElementById('col-color-input').value;
+      if (!label) return;
+
+      const btn = document.getElementById('btn-save-column');
+      setLoading(btn, true);
+      try {
+        await API.addColumn({ label, color });
+        showToast(`Added column "${label}"`, 'success');
+        closeAddColumnModal();
+        document.getElementById('add-column-form').reset();
+        boardColumns = await API.getColumns();
+        loadTasks();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        setLoading(btn, false, '<i data-lucide="check" style="width:16px; height:16px;"></i> Create Column');
+        refreshIcons();
+      }
+    }
+
+    async function deleteCustomColumn(colId) {
+      if (!confirm(`Delete column "${colId}"?`)) return;
+      try {
+        await API.deleteColumn(colId);
+        showToast('Column deleted', 'info');
+        boardColumns = await API.getColumns();
+        loadTasks();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // =========================================================================
+    // TASK ACTIONS
+    // =========================================================================
     async function uploadCSV(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -255,7 +416,7 @@
       fd.append('file', file);
       try {
         const res = await API.uploadTasksCSV(fd);
-        showToast(`Imported ${res.added || 'new'} tasks from CSV!`, 'success');
+        showToast(`Imported ${res.added || 'new'} tasks from CSV`, 'success');
         triggerConfetti();
         loadTasks();
       } catch (err) {
@@ -276,7 +437,7 @@
       setLoading(btn, true);
       try {
         await API.createTask(data);
-        showToast('Task added to board!', 'success');
+        showToast('Task added to board', 'success');
         closeAddTaskModal();
         form.reset();
         loadTasks();
@@ -292,7 +453,7 @@
       try {
         await API.updateTaskStatus(id, status);
         if (status === 'done') {
-          triggerConfetti(); // Celebratory confetti burst!
+          triggerConfetti();
         }
         loadTasks();
       } catch (err) {
@@ -335,13 +496,13 @@
       setLoading(btn, true);
       try {
         const res = await API.aiAssign();
-        showToast(res.message || 'AI Auto-Assignment complete!', 'success');
+        showToast(res.message || 'Auto-assignment complete', 'success');
         triggerConfetti();
         loadTasks();
       } catch (err) {
-        showToast(err.message || 'AI assignment failed', 'error');
+        showToast(err.message || 'Auto-assignment failed', 'error');
       } finally {
-        setLoading(btn, false, '<i data-lucide="bot" style="width:16px; height:16px;"></i> 🤖 AI Assign All');
+        setLoading(btn, false, '<i data-lucide="sparkles" style="width:16px; height:16px;"></i> Auto-Assign');
         refreshIcons();
       }
     }
@@ -350,12 +511,12 @@
       setLoading(btn, true);
       try {
         const res = await API.aiPrioritize();
-        showToast(`AI prioritized ${res.updated || 0} tasks!`, 'success');
+        showToast(`Prioritized ${res.updated || 0} tasks`, 'success');
         loadTasks();
       } catch (err) {
-        showToast(err.message || 'AI prioritization failed', 'error');
+        showToast(err.message || 'Prioritization failed', 'error');
       } finally {
-        setLoading(btn, false, '<i data-lucide="bar-chart-2" style="width:16px; height:16px;"></i> 📊 Prioritize');
+        setLoading(btn, false, '<i data-lucide="arrow-up-down" style="width:16px; height:16px;"></i> Prioritize');
         refreshIcons();
       }
     }
@@ -379,7 +540,7 @@
       body.scrollTop = body.scrollHeight;
 
       const typingId = 'typing-' + Date.now();
-      body.innerHTML += `<div class="chat-msg ai" id="${typingId}"><em>Analyzing board... 🤖</em></div>`;
+      body.innerHTML += `<div class="chat-msg ai" id="${typingId}"><em>Analyzing board...</em></div>`;
       body.scrollTop = body.scrollHeight;
 
       try {
@@ -395,12 +556,12 @@
         body.innerHTML += `<div class="chat-msg ai" style="background:#FFEAEA; border-color:#FF5252;"><strong>Error:</strong> ${err.message}</div>`;
       }
       body.scrollTop = body.scrollHeight;
+      refreshIcons();
     }
 
     window.onload = () => {
       initTasks();
       refreshIcons();
-      initTiltEffect();
     };
   </script>
 </body>

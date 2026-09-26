@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Members ⚡ PIJO AI Task Manager</title>
+  <title>Members - PIJO</title>
   <link rel="stylesheet" href="/static/css/style.css">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -23,7 +23,7 @@
             PIJO
           </div>
         </a>
-        <div class="sidebar-badge">⚡ AI Task Manager</div>
+        <div class="sidebar-badge">Task Manager</div>
       </div>
 
       <nav class="nav-links">
@@ -43,8 +43,8 @@
 
       <div class="sidebar-footer">
         <div class="sidebar-sticker">
-          🎯 <strong>SKILL-BASED</strong><br>
-          <span style="font-size:0.7rem; font-weight:600; opacity:0.85;">Automatic AI extraction</span>
+          <strong>SKILL-BASED</strong><br>
+          <span style="font-size:0.7rem; font-weight:600; opacity:0.85;">Automated AI extraction</span>
         </div>
       </div>
     </aside>
@@ -53,8 +53,8 @@
     <main class="main-content">
       <header class="page-header">
         <div>
-          <h1 class="page-title"><span class="highlight">Team Roster</span> 👥</h1>
-          <p class="page-subtitle">Add team members, upload markdown resumes & let AI extract verified skills</p>
+          <h1 class="page-title"><span class="highlight">Team Roster</span></h1>
+          <p class="page-subtitle">Onboard teammates, upload markdown resumes and extract verified skills</p>
         </div>
         <button class="btn btn-yellow" onclick="loadMembers()">
           <i data-lucide="refresh-cw" style="width:16px; height:16px;"></i> Refresh
@@ -64,7 +64,7 @@
       <div style="display: flex; gap: 2.25rem; align-items: flex-start; flex-wrap: wrap;">
         <!-- Add Member Form Card -->
         <div class="card card-yellow card-tilt" style="width: 380px; position: sticky; top: 1.5rem; flex-shrink: 0;">
-          <span class="card-sticker">➕ ONBOARD</span>
+          <span class="card-sticker">ONBOARD</span>
           <h3 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 900; margin-bottom: 1.25rem;">
             New Teammate
           </h3>
@@ -73,23 +73,42 @@
               <label class="form-label">Full Name *</label>
               <input type="text" name="name" class="form-control" placeholder="e.g. Alex Rivera" required>
             </div>
+            
             <div class="form-group">
               <label class="form-label">Role / Bio</label>
-              <textarea name="bio" class="form-control" placeholder="e.g. Full-stack hacker, React wizard & design enthusiast"></textarea>
+              <textarea name="bio" class="form-control" placeholder="e.g. Full-stack engineer, React and Python specialist"></textarea>
             </div>
+
+            <!-- Custom Interactive Profile Photo Picker -->
             <div class="form-group">
-              <label class="form-label">Profile Photo (Optional)</label>
-              <input type="file" name="pfp" accept="image/*" class="form-control">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Markdown / Text Resume (Optional)</label>
-              <input type="file" name="resume" accept=".md,.txt,.pdf" class="form-control">
-              <div style="font-size:0.75rem; font-weight:700; color:var(--neo-black); margin-top:0.4rem; background:#FFF; border:var(--border-thin); padding:0.35rem 0.5rem; border-radius:var(--radius-sm);">
-                💡 <em>Tip: Upload a markdown file with skills for instant AI matching!</em>
+              <label class="form-label">Profile Photo</label>
+              <input type="file" id="pfp-input" name="pfp" accept="image/*" style="display:none" onchange="handlePfpPreview(event)">
+              
+              <div class="avatar-picker-box" id="avatar-dropzone" onclick="document.getElementById('pfp-input').click()">
+                <div class="avatar-preview-slot" id="avatar-preview-slot">
+                  <i data-lucide="camera" id="avatar-placeholder-icon" style="width:28px; height:28px; stroke-width:2.5;"></i>
+                  <img id="avatar-preview-img" style="display:none;" alt="Profile preview">
+                </div>
+                <div style="font-family:var(--font-heading); font-size:0.85rem; font-weight:800; color:var(--neo-black);">
+                  Click or drag photo here
+                </div>
+                <div style="font-size:0.7rem; font-weight:700; color:rgba(18,18,18,0.6); margin-top:0.2rem;" id="avatar-file-name">
+                  PNG, JPG or WEBP
+                </div>
               </div>
             </div>
+
+            <!-- Resume Upload Dropzone -->
+            <div class="form-group">
+              <label class="form-label">Resume / Skills (Markdown or Text)</label>
+              <input type="file" name="resume" accept=".md,.txt,.pdf" class="form-control">
+              <div style="font-size:0.75rem; font-weight:700; color:var(--neo-black); margin-top:0.4rem; background:#FFF; border:var(--border-thin); padding:0.35rem 0.5rem; border-radius:var(--radius-sm);">
+                Upload a markdown file to enable automated AI skill extraction.
+              </div>
+            </div>
+
             <button type="submit" class="btn btn-pink" style="width: 100%; margin-top: 0.5rem; padding: 0.85rem;" id="btn-add-member">
-              <i data-lucide="sparkles" style="width:18px; height:18px;"></i>
+              <i data-lucide="user-plus" style="width:18px; height:18px;"></i>
               Create Member
             </button>
           </form>
@@ -107,22 +126,24 @@
 
   <!-- AI Chat Floating Button -->
   <button class="chat-widget-btn" onclick="toggleChat()" title="Open PIJO AI Chatbot">
-    <i data-lucide="bot" style="width:24px; height:24px;"></i>
+    <i data-lucide="message-square" style="width:20px; height:20px;"></i>
     <span>Ask PIJO AI</span>
   </button>
 
-  <!-- AI Chat Modal -->
+  <!-- AI Chat Modal (Resizable) -->
   <div class="chat-modal" id="chat-modal">
     <div class="chat-header">
       <div style="display:flex; align-items:center; gap:0.5rem;">
-        <span style="font-size:1.3rem;">🤖</span>
+        <i data-lucide="bot" style="width:20px; height:20px;"></i>
         <span>PIJO AI Assistant</span>
       </div>
-      <button onclick="toggleChat()" title="Close chat">✕</button>
+      <button onclick="toggleChat()" title="Close chat">
+        <i data-lucide="x" style="width:16px; height:16px;"></i>
+      </button>
     </div>
     <div class="chat-body" id="chat-body">
       <div class="chat-msg ai">
-        <strong>👋 Hello!</strong> I can tell you which member is strongest in specific tech stacks or recommend assignments.
+        <strong>Hello.</strong> Ask me which member is strongest in specific tech stacks or recommend task assignments.
       </div>
     </div>
     <div class="chat-footer">
@@ -138,6 +159,43 @@
   <script src="/static/js/effects.js"></script>
   <script src="/static/js/cursor.js"></script>
   <script>
+    function handlePfpPreview(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const img = document.getElementById('avatar-preview-img');
+      const icon = document.getElementById('avatar-placeholder-icon');
+      const fileNameEl = document.getElementById('avatar-file-name');
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        img.src = event.target.result;
+        img.style.display = 'block';
+        icon.style.display = 'none';
+        fileNameEl.textContent = file.name;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Drag and drop for avatar
+    const dropzone = document.getElementById('avatar-dropzone');
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('dragover');
+    });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files && files[0] && files[0].type.startsWith('image/')) {
+        document.getElementById('pfp-input').files = files;
+        handlePfpPreview({ target: { files } });
+      }
+    });
+
     async function loadMembers() {
       const grid = document.getElementById('members-grid');
       try {
@@ -146,7 +204,7 @@
           grid.innerHTML = `
             <div class="empty-state card" style="grid-column: 1/-1;">
               <h3>No members registered yet</h3>
-              <p style="margin-top:0.5rem;">Use the form on the left to add your first team member!</p>
+              <p style="margin-top:0.5rem;">Use the form on the left to add your first team member.</p>
             </div>`;
           return;
         }
@@ -165,7 +223,7 @@
             </p>
             <div>
               <div style="font-family:var(--font-heading); font-size:0.75rem; font-weight:900; text-transform:uppercase; margin-bottom:0.4rem; color:rgba(18,18,18,0.7);">
-                🎯 Technical & Domain Skills:
+                Extracted Skills:
               </div>
               <div style="display:flex; flex-wrap:wrap;">
                 ${(m.skills || []).map(s => `<span class="skill-chip">${s}</span>`).join('')}
@@ -175,12 +233,12 @@
             ${m.resume_path ? `
               <div style="font-size:0.8rem; font-weight:800;">
                 <a href="${m.resume_path}" target="_blank" style="color:var(--neo-black); text-decoration:underline;">
-                  📄 View Attached Resume
+                  View Attached Resume
                 </a>
               </div>` : ''}
             <div class="member-actions">
               <button class="btn btn-sm btn-yellow" style="flex:1;" onclick="extractSkills('${m.id}', this)">
-                <i data-lucide="cpu" style="width:14px; height:14px;"></i> 🤖 Extract Skills
+                <i data-lucide="cpu" style="width:14px; height:14px;"></i> Extract Skills
               </button>
               <button class="btn btn-sm btn-danger" onclick="deleteMember('${m.id}')" title="Delete Member">
                 <i data-lucide="trash-2" style="width:14px; height:14px;"></i> Delete
@@ -205,14 +263,17 @@
       setLoading(btn, true);
       try {
         await API.createMember(formData);
-        showToast('Member added successfully!', 'success');
+        showToast('Member added successfully', 'success');
         triggerConfetti();
         form.reset();
+        document.getElementById('avatar-preview-img').style.display = 'none';
+        document.getElementById('avatar-placeholder-icon').style.display = 'block';
+        document.getElementById('avatar-file-name').textContent = 'PNG, JPG or WEBP';
         loadMembers();
       } catch (err) {
         showToast(err.message, 'error');
       } finally {
-        setLoading(btn, false, '<i data-lucide="sparkles" style="width:18px; height:18px;"></i> Create Member');
+        setLoading(btn, false, '<i data-lucide="user-plus" style="width:18px; height:18px;"></i> Create Member');
         refreshIcons();
       }
     }
@@ -222,13 +283,13 @@
       try {
         const res = await API.extractSkills(id);
         const count = (res.skills || []).length;
-        showToast(count > 0 ? `AI detected ${count} skills!` : 'No skills found in resume.', 'info');
+        showToast(count > 0 ? `AI detected ${count} skills` : 'No skills found in resume', 'info');
         if (count > 0) triggerConfetti();
         loadMembers();
       } catch (err) {
         showToast(err.message, 'error');
       } finally {
-        setLoading(btn, false, '<i data-lucide="cpu" style="width:14px; height:14px;"></i> 🤖 Extract Skills');
+        setLoading(btn, false, '<i data-lucide="cpu" style="width:14px; height:14px;"></i> Extract Skills');
         refreshIcons();
       }
     }
@@ -263,7 +324,7 @@
       body.scrollTop = body.scrollHeight;
 
       const typingId = 'typing-' + Date.now();
-      body.innerHTML += `<div class="chat-msg ai" id="${typingId}"><em>Analyzing... 🤖</em></div>`;
+      body.innerHTML += `<div class="chat-msg ai" id="${typingId}"><em>Analyzing...</em></div>`;
       body.scrollTop = body.scrollHeight;
 
       try {
@@ -279,6 +340,7 @@
         body.innerHTML += `<div class="chat-msg ai" style="background:#FFEAEA; border-color:#FF5252;"><strong>Error:</strong> ${err.message}</div>`;
       }
       body.scrollTop = body.scrollHeight;
+      refreshIcons();
     }
 
     window.onload = () => {

@@ -1,4 +1,4 @@
-// utils.js — Neobrutalism UI Helpers & Markdown Parser
+// utils.js — Neobrutalism UI Helpers & Markdown Parser (Emoji-Free Clean Design)
 
 // Safe Markdown Parser helper
 function renderMarkdown(content) {
@@ -43,15 +43,16 @@ function showToast(message, type = 'info') {
 
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
-  const icons = {
-    success: '🚀',
-    error: '💥',
-    info: '💡',
-    warning: '⚠️'
+
+  const typeLabels = {
+    success: 'SUCCESS',
+    error: 'ERROR',
+    info: 'INFO',
+    warning: 'WARN'
   };
 
   toast.innerHTML = `
-    <span style="font-size:1.15rem;">${icons[type] || '⚡'}</span>
+    <span class="badge badge-gray" style="font-size:0.65rem; padding:0.15rem 0.4rem; background:#121212; color:#fff;">${typeLabels[type] || 'NOTICE'}</span>
     <span>${message}</span>
   `;
   container.appendChild(toast);
@@ -65,24 +66,25 @@ function showToast(message, type = 'info') {
 
 function statusBadge(status) {
   const map = {
-    todo: ['yellow', '🟡 To Do'],
-    in_progress: ['blue', '🔵 In Progress'],
-    done: ['green', '🟢 Done'],
-    blocked: ['red', '🔴 Blocked'],
+    todo: ['yellow', 'To Do'],
+    in_progress: ['blue', 'In Progress'],
+    done: ['green', 'Done'],
+    blocked: ['red', 'Blocked'],
+    dropped: ['gray', 'Dropped']
   };
-  const [color, label] = map[status] || ['gray', status || 'To Do'];
-  return `<span class="badge badge-${color}">${label}</span>`;
+  const [color, label] = map[status] || ['gray', status ? status.replace(/_/g, ' ') : 'To Do'];
+  return `<span class="badge badge-${color}"><span class="status-dot dot-${color}"></span> ${label}</span>`;
 }
 
 function priorityBadge(priority) {
   const map = {
-    low: ['green', '🌱 Low'],
-    medium: ['yellow', '🔹 Med'],
-    high: ['orange', '⚡ High'],
-    critical: ['red', '🔥 Critical'],
+    low: ['green', 'Low'],
+    medium: ['yellow', 'Medium'],
+    high: ['orange', 'High'],
+    critical: ['red', 'Critical'],
   };
   const [color, label] = map[priority] || ['gray', priority || 'Medium'];
-  return `<span class="badge badge-${color}">${label}</span>`;
+  return `<span class="badge badge-${color}">${label.toUpperCase()}</span>`;
 }
 
 function avatarInitials(name) {

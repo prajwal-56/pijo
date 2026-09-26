@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PIJO ⚡ AI Team Task Orchestrator</title>
+  <title>PIJO - Autonomous Team Task Manager</title>
   <link rel="stylesheet" href="/static/css/style.css">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -23,7 +23,7 @@
             PIJO
           </div>
         </a>
-        <div class="sidebar-badge">⚡ AI Task Manager</div>
+        <div class="sidebar-badge">Task Manager</div>
       </div>
 
       <nav class="nav-links">
@@ -43,7 +43,7 @@
 
       <div class="sidebar-footer">
         <div class="sidebar-sticker">
-          🚀 <strong>HACKATHON MODE</strong><br>
+          <strong>HACKATHON MODE</strong><br>
           <span style="font-size:0.7rem; font-weight:600; opacity:0.85;">Skill-weighted engine</span>
         </div>
       </div>
@@ -51,22 +51,22 @@
 
     <!-- Main Content -->
     <main class="main-content">
-      <!-- Fun Pop Marquee Bar -->
+      <!-- Pop Marquee Bar -->
       <div class="pop-ticker">
         <div style="display:flex; align-items:center; gap:0.75rem;">
-          <span class="ticker-tag">⚡ LIVE SYSTEM</span>
-          <span>PIJO AI-Powered Team Task Manager is active & orchestrating work!</span>
+          <span class="ticker-tag">SYSTEM ONLINE</span>
+          <span>PIJO AI-Powered Team Task Manager is active and orchestrating work.</span>
         </div>
         <div style="display:flex; gap:0.5rem; align-items:center;">
-          <span class="badge badge-yellow">🤖 Gemini 3.8</span>
-          <span class="badge badge-green">🟢 Ready</span>
+          <span class="badge badge-yellow">Gemini 3.8</span>
+          <span class="badge badge-green"><span class="status-dot dot-green"></span> Ready</span>
         </div>
       </div>
 
       <!-- Landing Page Eye-Catching Hero Section -->
       <section class="hero-banner card-tilt">
         <div class="hero-pill-badge">
-          <span>⚡ AUTONOMOUS TEAM ORCHESTRATOR</span>
+          <span>Autonomous Team Orchestrator</span>
         </div>
         
         <h1 class="hero-title">
@@ -75,14 +75,14 @@
         </h1>
         
         <p class="hero-desc">
-          PIJO parses student resumes, ingests task backlogs via CSV, and leverages Gemini AI to automatically assign, prioritize, and balance workloads in seconds. No spreadsheet chaos.
+          PIJO parses student resumes, ingests task backlogs via CSV, and leverages Gemini AI to automatically assign, prioritize, and balance workloads in seconds.
         </p>
 
         <!-- Quick Launch Action Buttons -->
         <div class="hero-actions">
           <button class="btn btn-pink" id="hero-ai-assign-btn" onclick="quickAiAssign(this)">
-            <i data-lucide="bot" style="width:18px; height:18px;"></i>
-            🤖 Run AI Auto-Assign
+            <i data-lucide="sparkles" style="width:18px; height:18px;"></i>
+            Run AI Auto-Assign
           </button>
           <a href="/tasks" class="btn btn-yellow">
             <i data-lucide="kanban" style="width:18px; height:18px;"></i>
@@ -92,16 +92,16 @@
             <i data-lucide="user-plus" style="width:18px; height:18px;"></i>
             Add Team Member
           </a>
-          <button class="btn btn-purple" onclick="triggerConfetti()" title="Trigger Celebration Confetti!">
-            🎉 Celebrate
+          <button class="btn btn-purple" onclick="triggerConfetti()" title="Trigger Celebration Confetti">
+            <i data-lucide="party-popper" style="width:16px; height:16px;"></i> Celebrate
           </button>
         </div>
 
         <!-- Dynamic Sprint Progress Meter -->
         <div class="sprint-meter-container">
           <div class="sprint-meter-header">
-            <span>🏁 Sprint Velocity & Completion</span>
-            <span id="sprint-percent-text">0% Done</span>
+            <span>Sprint Velocity & Completion</span>
+            <span id="sprint-percent-text">0% Complete</span>
           </div>
           <div class="sprint-meter-bar">
             <div class="sprint-meter-fill" id="sprint-meter-fill"></div>
@@ -114,31 +114,32 @@
         <div class="card stat-card stat-card-1 card-tilt">
           <span class="label">Team Members</span>
           <span class="value" id="stat-members">0</span>
-          <div style="margin-top:0.5rem; font-size:0.75rem; font-weight:800; text-transform:uppercase;">👥 Active Students</div>
+          <div style="margin-top:0.5rem; font-size:0.75rem; font-weight:800; text-transform:uppercase;">Active Students</div>
         </div>
         <div class="card stat-card stat-card-2 card-tilt">
           <span class="label">Total Tasks</span>
           <span class="value" id="stat-tasks">0</span>
-          <div style="margin-top:0.5rem; font-size:0.75rem; font-weight:800; text-transform:uppercase;">📋 In Pipeline</div>
+          <div style="margin-top:0.5rem; font-size:0.75rem; font-weight:800; text-transform:uppercase;">In Pipeline</div>
         </div>
         <div class="card stat-card stat-card-3 card-tilt">
           <span class="label">Completed</span>
           <span class="value" id="stat-done">0</span>
-          <div style="margin-top:0.5rem; font-size:0.75rem; font-weight:800; text-transform:uppercase;">🎉 Shipped & Done</div>
+          <div style="margin-top:0.5rem; font-size:0.75rem; font-weight:800; text-transform:uppercase;">Shipped and Done</div>
         </div>
         <div class="card stat-card stat-card-4 card-tilt">
           <span class="label">Unassigned</span>
           <span class="value" id="stat-unassigned">0</span>
-          <div style="margin-top:0.5rem; font-size:0.75rem; font-weight:800; text-transform:uppercase;">🤖 Needs AI Match</div>
+          <div style="margin-top:0.5rem; font-size:0.75rem; font-weight:800; text-transform:uppercase;">Awaiting Allocation</div>
         </div>
       </div>
 
       <!-- AI Project Summary Card -->
       <div class="card card-purple card-tilt" style="margin-bottom: 2.25rem;">
-        <span class="card-sticker">🤖 AI BRAIN</span>
+        <span class="card-sticker">AI REPORT</span>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
           <h3 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 900; display:flex; align-items:center; gap:0.5rem;">
-            🧠 Executive AI Project Health
+            <i data-lucide="activity" style="width:22px; height:22px;"></i>
+            Executive AI Project Health
           </h3>
           <button class="btn btn-sm btn-primary" id="btn-refresh-summary" onclick="loadSummary()">
             <i data-lucide="refresh-cw" style="width:14px; height:14px;"></i> Refresh
@@ -155,9 +156,9 @@
         <div class="card card-tilt">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
             <h3 style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 800;">
-              📌 Recent Tasks
+              Recent Tasks
             </h3>
-            <a href="/tasks" class="btn btn-sm btn-yellow">View All →</a>
+            <a href="/tasks" class="btn btn-sm btn-yellow">View Board</a>
           </div>
           <div id="recent-tasks-list" style="display: flex; flex-direction: column; gap: 0.85rem;">
             Loading tasks...
@@ -168,9 +169,9 @@
         <div class="card card-tilt">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
             <h3 style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 800;">
-              👥 Team Roster
+              Team Roster
             </h3>
-            <a href="/members" class="btn btn-sm btn-cyan">Manage →</a>
+            <a href="/members" class="btn btn-sm btn-cyan">Manage Team</a>
           </div>
           <div id="team-members-list" style="display: flex; flex-direction: column; gap: 0.85rem;">
             Loading team...
@@ -182,23 +183,25 @@
 
   <!-- AI Chat Floating Button -->
   <button class="chat-widget-btn" onclick="toggleChat()" title="Open PIJO AI Chatbot">
-    <i data-lucide="bot" style="width:24px; height:24px;"></i>
+    <i data-lucide="message-square" style="width:20px; height:20px;"></i>
     <span>Ask PIJO AI</span>
   </button>
 
-  <!-- AI Chat Modal -->
+  <!-- AI Chat Modal (Resizable) -->
   <div class="chat-modal" id="chat-modal">
     <div class="chat-header">
       <div style="display:flex; align-items:center; gap:0.5rem;">
-        <span style="font-size:1.3rem;">🤖</span>
-        <span>PIJO AI Project Manager</span>
+        <i data-lucide="bot" style="width:20px; height:20px;"></i>
+        <span>PIJO AI Assistant</span>
       </div>
-      <button onclick="toggleChat()" title="Close chat">✕</button>
+      <button onclick="toggleChat()" title="Close chat">
+        <i data-lucide="x" style="width:16px; height:16px;"></i>
+      </button>
     </div>
     <div class="chat-body" id="chat-body">
       <div class="chat-msg ai">
-        <strong>👋 Hey team!</strong> I'm your PIJO AI manager.
-        Ask me anything about team skills, task assignments, project status, or task recommendations!
+        <strong>Welcome.</strong> I am your PIJO AI manager.
+        Ask me anything regarding team skills, task assignments, project status, or task recommendations.
       </div>
     </div>
     <div class="chat-footer">
@@ -301,13 +304,13 @@
       setLoading(btn, true);
       try {
         const res = await API.aiAssign();
-        showToast(res.message || 'AI Auto-Assignment complete!', 'success');
+        showToast(res.message || 'Auto-assignment complete', 'success');
         triggerConfetti();
         initDashboard();
       } catch (err) {
         showToast(err.message || 'Assignment failed', 'error');
       } finally {
-        setLoading(btn, false, '<i data-lucide="bot" style="width:18px; height:18px;"></i> 🤖 Run AI Auto-Assign');
+        setLoading(btn, false, '<i data-lucide="sparkles" style="width:18px; height:18px;"></i> Run AI Auto-Assign');
         refreshIcons();
       }
     }
@@ -350,7 +353,7 @@
       body.scrollTop = body.scrollHeight;
 
       const typingId = 'typing-' + Date.now();
-      body.innerHTML += `<div class="chat-msg ai" id="${typingId}"><em>Thinking... 🤖</em></div>`;
+      body.innerHTML += `<div class="chat-msg ai" id="${typingId}"><em>Thinking...</em></div>`;
       body.scrollTop = body.scrollHeight;
 
       try {
@@ -366,6 +369,7 @@
         body.innerHTML += `<div class="chat-msg ai" style="background:#FFEAEA; border-color:#FF5252;"><strong>Error:</strong> ${err.message}</div>`;
       }
       body.scrollTop = body.scrollHeight;
+      refreshIcons();
     }
 
     window.onload = () => {

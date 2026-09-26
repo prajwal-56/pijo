@@ -28,7 +28,7 @@ class Task(BaseModel):
     id: str
     title: str
     description: str = ""
-    status: TaskStatus = TaskStatus.todo
+    status: str = "todo"
     priority: TaskPriority = TaskPriority.medium
     assigned_to: Optional[str] = None   # member id
     assigned_to_name: Optional[str] = None
@@ -36,7 +36,7 @@ class Task(BaseModel):
     created_at: str
 
 class StatusUpdate(BaseModel):
-    status: TaskStatus
+    status: str
 
 class ChatRequest(BaseModel):
     message: str

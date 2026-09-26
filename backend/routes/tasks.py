@@ -7,11 +7,44 @@ from typing import Optional
 from fastapi import APIRouter, UploadFile, File, HTTPException, Body
 from fastapi.responses import JSONResponse
 
-from storage import read_tasks, write_tasks, read_members
-from models import TaskStatus, StatusUpdate
+from storage import read_tasks, write_tasks, read_members, read_columns, write_columns
+from models import TaskPriority, StatusUpdate
 from ai_service import assign_tasks, prioritize_tasks
 
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
+
+
+@router.get("/columns")
+def list_columns():
+    return read_columns()
+
+
+@router.post("/columns")
+def add_column(payload: dict = Body(...)):
+    label = payload.get("label", "").strip()
+    if not label:
+        raise HTTPException(status_code=400, detail="Column label required")
+    col_id = payload.get("id") or label.lower().replace(" ", "_")
+    color = payload.get("color") or "yellow"
+    columns = read_columns()
+    if any(c["id"] == col_id for c in columns):
+        raise HTTPException(status_code=400, detail="Column ID already exists")
+    new_col = {"id": col_id, "label": label, "color": color}
+    columns.append(new_col)
+    write_columns(columns)
+    return new_col
+
+
+@router.delete("/columns/{col_id}")
+def delete_column(col_id: str):
+    columns = read_columns()
+    if col_id in ["todo", "done"]:
+        raise HTTPException(status_code=400, detail="Cannot delete core column")
+    new_cols = [c for c in columns if c["id"] != col_id]
+    if len(new_cols) == len(columns):
+        raise HTTPException(status_code=404, detail="Column not found")
+    write_columns(new_cols)
+    return {"ok": True}
 
 
 @router.get("/")
@@ -78,7 +111,7 @@ def update_status(task_id: str, body: StatusUpdate):
     tasks = read_tasks()
     for t in tasks:
         if t["id"] == task_id:
-            t["status"] = body.status.value
+            t["status"] = str(body.status)
             write_tasks(tasks)
             return t
     raise HTTPException(status_code=404, detail="Task not found")

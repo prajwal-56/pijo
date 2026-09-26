@@ -38,6 +38,9 @@ const API = {
   aiPrioritize: () => API._req('POST', '/api/tasks/prioritize'),
   deleteTask: (id) => API._req('DELETE', `/api/tasks/${id}`),
   clearTasks: () => API._req('DELETE', '/api/tasks/'),
+  getColumns: () => API._req('GET', '/api/tasks/columns'),
+  addColumn: (data) => API._req('POST', '/api/tasks/columns', data),
+  deleteColumn: (id) => API._req('DELETE', `/api/tasks/columns/${id}`),
 
   // AI Assistant API
   chat: (message) => API._req('POST', '/api/ai/chat', { message }),
