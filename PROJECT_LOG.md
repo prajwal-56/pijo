@@ -4,11 +4,12 @@
 ## Overview
 PIJO is an AI-powered team task manager built for a hackathon.
 - **Backend**: Python + FastAPI, JSON file storage in `backend/data/`
-- **Frontend**: Vanilla HTML5/CSS3/ES6+ JavaScript (Dark Theme)
-- **AI Engine**: Google Gemini API (`gemini-1.5-flash`) with resilient heuristic matching fallback
+- **Frontend**: Neobrutalism Pop-Art UI with Space Grotesk / Plus Jakarta Sans, Lucide Icons & Markdown parsing
+- **Animations & Effects**: Interactive particle cursor trail, full-screen celebratory confetti, WebAudio tactile feedback, and 3D card tilt
+- **AI Engine**: Google Gemini API (`gemini-3.8-flash` / `gemini-flash-latest`) with resilient heuristic matching fallback
 - **Server**: FastAPI at `http://localhost:8000`
 
-## Current Status: ✅ PHASE 1 & CORE PHASE 2 BUILT & VERIFIED
+## Current Status: 🚀 PRODUCTION & DEMO READY (Phase 1, 2 & Creative Polish)
 Last Updated: 2026-09-26
 
 ---
@@ -18,7 +19,7 @@ Last Updated: 2026-09-26
 ```
 pijo/
 ├── backend/
-│   ├── main.py              # FastAPI app with static & API routing
+│   ├── main.py              # FastAPI app with static & friendly routing (/members, /tasks)
 │   ├── storage.py           # Persistent JSON data storage manager
 │   ├── models.py            # Pydantic schemas (Member, Task, StatusUpdate, ChatRequest)
 │   ├── ai_service.py        # Gemini API & fallback engine (extract_skills, assign_tasks, prioritize, chat, summary)
@@ -32,14 +33,16 @@ pijo/
 │       ├── tasks.json       # Task records
 │       └── uploads/         # Stored profile photos & markdown resumes
 ├── frontend/
-│   ├── index.html           # Dashboard with real-time stats, AI summary, recent tasks
-│   ├── members.html         # Member manager with resume upload & skill extraction
-│   ├── tasks.html           # Kanban task board (To Do, In Progress, Done, Blocked)
+│   ├── index.html           # Landing/Dashboard: Hero banner, Sprint meter, stats, AI summary, recent tasks
+│   ├── members.html         # Member onboarding card, resume upload & skill extraction
+│   ├── tasks.html           # 4-lane Neobrutalist Kanban board (To Do, In Progress, Done, Blocked)
 │   ├── css/
-│   │   └── style.css        # Full dark theme stylesheet
+│   │   └── style.css        # Complete Neobrutalism design system stylesheet
 │   └── js/
 │       ├── api.js           # Centralized API fetch client
-│       └── utils.js         # Shared UI helpers (toasts, badges, avatars, relative time)
+│       ├── utils.js         # Shared UI helpers (toasts, badges, avatars, Marked.js parser)
+│       ├── cursor.js        # Minimal interactive particle cursor trail & click burst
+│       └── effects.js       # Full-screen confetti cannon, 3D card tilt, WebAudio synthesizer
 ├── samples/
 │   ├── sample_tasks.csv               # 8 sample team tasks for CSV upload
 │   ├── sample_resume_frontend.md      # Frontend engineer markdown resume
@@ -65,7 +68,10 @@ pijo/
 - [x] **Kanban Board**: 4-column agile board with real-time task status transitions and re-assignment
 - [x] **AI Project Assistant**: Floating chat widget with full context of current members and tasks (`/api/ai/chat`)
 - [x] **AI Project Summary**: High-level executive project health and progress reporting (`/api/ai/summary`)
-- [x] **Resilient Fallback**: Graceful local heuristic fallback mode if Gemini API key is not supplied or offline
+- [x] **Markdown Parser**: Live markdown parsing in chatbot for lists, bold text, code blocks, blockquotes
+- [x] **Neobrutalism Design**: High-contrast thick borders, pop-art color palette, hard drop shadows, tactile bouncy buttons
+- [x] **Landing Hero Section**: Bold high-energy typography, animated badge stickers, and dynamic striped Sprint velocity meter
+- [x] **Micro-Interactions**: Particle cursor trail, click burst, 3D card perspective tilt, confetti celebrations on task completion, and tactile audio feedback
 - [x] **Automated Test Suite**: End-to-end verification passing in `tests/test_api.py`
 
 ---
@@ -79,8 +85,8 @@ pip install -r requirements.txt
 # 2. (Optional) Set your Gemini API key in .env
 # GEMINI_API_KEY=your_key_here
 
-# 3. Start the FastAPI server
+# 3. Start the FastAPI server on all interfaces
 cd backend
-python3 -m uvicorn main:app --reload --port 8000
+python3 -m uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 Open `http://localhost:8000` in the browser.
