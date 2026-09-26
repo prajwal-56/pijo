@@ -153,6 +153,8 @@
 
   <script src="/static/js/api.js"></script>
   <script src="/static/js/utils.js"></script>
+  <script src="/static/js/effects.js"></script>
+  <script src="/static/js/cursor.js"></script>
   <script>
     let membersList = [];
     
@@ -196,6 +198,7 @@
         showToast('Failed to load tasks', 'error');
       } finally {
         refreshIcons();
+        initTiltEffect();
       }
     }
 
@@ -208,7 +211,7 @@
       const statusOpts = columns.map(c => `<option value="${c.id}" ${c.id === task.status ? 'selected' : ''}>${c.emoji} ${c.label}</option>`).join('');
 
       return `
-        <div class="task-card">
+        <div class="task-card card-tilt">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
             ${priorityBadge(task.priority)}
             <button class="btn btn-sm btn-danger" style="padding:0.15rem 0.45rem; font-size:0.65rem;" onclick="deleteTask('${task.id}')" title="Delete Task">✕</button>
@@ -253,6 +256,7 @@
       try {
         const res = await API.uploadTasksCSV(fd);
         showToast(`Imported ${res.added || 'new'} tasks from CSV!`, 'success');
+        triggerConfetti();
         loadTasks();
       } catch (err) {
         showToast(err.message, 'error');
@@ -287,6 +291,9 @@
     async function updateStatus(id, status) {
       try {
         await API.updateTaskStatus(id, status);
+        if (status === 'done') {
+          triggerConfetti(); // Celebratory confetti burst!
+        }
         loadTasks();
       } catch (err) {
         showToast(err.message, 'error');
@@ -329,6 +336,7 @@
       try {
         const res = await API.aiAssign();
         showToast(res.message || 'AI Auto-Assignment complete!', 'success');
+        triggerConfetti();
         loadTasks();
       } catch (err) {
         showToast(err.message || 'AI assignment failed', 'error');
@@ -392,6 +400,7 @@
     window.onload = () => {
       initTasks();
       refreshIcons();
+      initTiltEffect();
     };
   </script>
 </body>

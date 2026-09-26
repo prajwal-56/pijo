@@ -63,7 +63,7 @@
 
       <div style="display: flex; gap: 2.25rem; align-items: flex-start; flex-wrap: wrap;">
         <!-- Add Member Form Card -->
-        <div class="card card-yellow" style="width: 380px; position: sticky; top: 1.5rem; flex-shrink: 0;">
+        <div class="card card-yellow card-tilt" style="width: 380px; position: sticky; top: 1.5rem; flex-shrink: 0;">
           <span class="card-sticker">➕ ONBOARD</span>
           <h3 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 900; margin-bottom: 1.25rem;">
             New Teammate
@@ -135,6 +135,8 @@
 
   <script src="/static/js/api.js"></script>
   <script src="/static/js/utils.js"></script>
+  <script src="/static/js/effects.js"></script>
+  <script src="/static/js/cursor.js"></script>
   <script>
     async function loadMembers() {
       const grid = document.getElementById('members-grid');
@@ -150,7 +152,7 @@
         }
 
         grid.innerHTML = members.map(m => `
-          <div class="card member-card">
+          <div class="card member-card card-tilt">
             <div class="member-header">
               ${renderMemberAvatar(m, 'avatar-lg')}
               <div>
@@ -190,6 +192,7 @@
         showToast('Failed to load members: ' + err.message, 'error');
       } finally {
         refreshIcons();
+        initTiltEffect();
       }
     }
 
@@ -203,6 +206,7 @@
       try {
         await API.createMember(formData);
         showToast('Member added successfully!', 'success');
+        triggerConfetti();
         form.reset();
         loadMembers();
       } catch (err) {
@@ -219,6 +223,7 @@
         const res = await API.extractSkills(id);
         const count = (res.skills || []).length;
         showToast(count > 0 ? `AI detected ${count} skills!` : 'No skills found in resume.', 'info');
+        if (count > 0) triggerConfetti();
         loadMembers();
       } catch (err) {
         showToast(err.message, 'error');
@@ -279,6 +284,7 @@
     window.onload = () => {
       loadMembers();
       refreshIcons();
+      initTiltEffect();
     };
   </script>
 </body>

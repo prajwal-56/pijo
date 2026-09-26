@@ -44,7 +44,7 @@
       <div class="sidebar-footer">
         <div class="sidebar-sticker">
           🚀 <strong>HACKATHON MODE</strong><br>
-          <span style="font-size:0.7rem; font-weight:600; opacity:0.85;">Auto-allocating tasks</span>
+          <span style="font-size:0.7rem; font-weight:600; opacity:0.85;">Skill-weighted engine</span>
         </div>
       </div>
     </aside>
@@ -54,50 +54,79 @@
       <!-- Fun Pop Marquee Bar -->
       <div class="pop-ticker">
         <div style="display:flex; align-items:center; gap:0.75rem;">
-          <span class="ticker-tag">⚡ LIVE</span>
+          <span class="ticker-tag">⚡ LIVE SYSTEM</span>
           <span>PIJO AI-Powered Team Task Manager is active & orchestrating work!</span>
         </div>
-        <div style="display:flex; gap:0.5rem;">
+        <div style="display:flex; gap:0.5rem; align-items:center;">
           <span class="badge badge-yellow">🤖 Gemini 3.8</span>
-          <span class="badge badge-green">🟢 All Systems Online</span>
+          <span class="badge badge-green">🟢 Ready</span>
         </div>
       </div>
 
-      <header class="page-header">
-        <div>
-          <h1 class="page-title"><span class="highlight">Mission Control</span> 🚀</h1>
-          <p class="page-subtitle">Real-time team analytics, AI allocations & active project telemetry</p>
+      <!-- Landing Page Eye-Catching Hero Section -->
+      <section class="hero-banner card-tilt">
+        <div class="hero-pill-badge">
+          <span>⚡ AUTONOMOUS TEAM ORCHESTRATOR</span>
         </div>
-        <div style="display:flex; gap:0.75rem;">
-          <a href="/tasks" class="btn btn-primary">
-            <i data-lucide="plus-circle" style="width:18px; height:18px;"></i>
-            Manage Tasks
+        
+        <h1 class="hero-title">
+          STOP GUESSING WHO DOES WHAT.<br>
+          <span class="highlight-yellow">ALLOCATE BY SKILLS.</span>
+        </h1>
+        
+        <p class="hero-desc">
+          PIJO parses student resumes, ingests task backlogs via CSV, and leverages Gemini AI to automatically assign, prioritize, and balance workloads in seconds. No spreadsheet chaos.
+        </p>
+
+        <!-- Quick Launch Action Buttons -->
+        <div class="hero-actions">
+          <button class="btn btn-pink" id="hero-ai-assign-btn" onclick="quickAiAssign(this)">
+            <i data-lucide="bot" style="width:18px; height:18px;"></i>
+            🤖 Run AI Auto-Assign
+          </button>
+          <a href="/tasks" class="btn btn-yellow">
+            <i data-lucide="kanban" style="width:18px; height:18px;"></i>
+            Open Task Board
           </a>
           <a href="/members" class="btn btn-cyan">
             <i data-lucide="user-plus" style="width:18px; height:18px;"></i>
-            Add Member
+            Add Team Member
           </a>
+          <button class="btn btn-purple" onclick="triggerConfetti()" title="Trigger Celebration Confetti!">
+            🎉 Celebrate
+          </button>
         </div>
-      </header>
 
-      <!-- Stats Grid -->
+        <!-- Dynamic Sprint Progress Meter -->
+        <div class="sprint-meter-container">
+          <div class="sprint-meter-header">
+            <span>🏁 Sprint Velocity & Completion</span>
+            <span id="sprint-percent-text">0% Done</span>
+          </div>
+          <div class="sprint-meter-bar">
+            <div class="sprint-meter-fill" id="sprint-meter-fill"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats Grid with 3D Tilt -->
       <div class="stats-grid" id="stats-container">
-        <div class="card stat-card stat-card-1">
+        <div class="card stat-card stat-card-1 card-tilt">
           <span class="label">Team Members</span>
           <span class="value" id="stat-members">0</span>
           <div style="margin-top:0.5rem; font-size:0.75rem; font-weight:800; text-transform:uppercase;">👥 Active Students</div>
         </div>
-        <div class="card stat-card stat-card-2">
+        <div class="card stat-card stat-card-2 card-tilt">
           <span class="label">Total Tasks</span>
           <span class="value" id="stat-tasks">0</span>
           <div style="margin-top:0.5rem; font-size:0.75rem; font-weight:800; text-transform:uppercase;">📋 In Pipeline</div>
         </div>
-        <div class="card stat-card stat-card-3">
+        <div class="card stat-card stat-card-3 card-tilt">
           <span class="label">Completed</span>
           <span class="value" id="stat-done">0</span>
           <div style="margin-top:0.5rem; font-size:0.75rem; font-weight:800; text-transform:uppercase;">🎉 Shipped & Done</div>
         </div>
-        <div class="card stat-card stat-card-4">
+        <div class="card stat-card stat-card-4 card-tilt">
           <span class="label">Unassigned</span>
           <span class="value" id="stat-unassigned">0</span>
           <div style="margin-top:0.5rem; font-size:0.75rem; font-weight:800; text-transform:uppercase;">🤖 Needs AI Match</div>
@@ -105,8 +134,8 @@
       </div>
 
       <!-- AI Project Summary Card -->
-      <div class="card card-purple" style="margin-bottom: 2.25rem;">
-        <span class="card-sticker">🤖 AI SUMMARY</span>
+      <div class="card card-purple card-tilt" style="margin-bottom: 2.25rem;">
+        <span class="card-sticker">🤖 AI BRAIN</span>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
           <h3 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 900; display:flex; align-items:center; gap:0.5rem;">
             🧠 Executive AI Project Health
@@ -123,7 +152,7 @@
       <!-- Grid: Recent Tasks & Team Members -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 2rem;">
         <!-- Recent Tasks -->
-        <div class="card">
+        <div class="card card-tilt">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
             <h3 style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 800;">
               📌 Recent Tasks
@@ -136,7 +165,7 @@
         </div>
 
         <!-- Team Members -->
-        <div class="card">
+        <div class="card card-tilt">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
             <h3 style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 800;">
               👥 Team Roster
@@ -182,6 +211,8 @@
 
   <script src="/static/js/api.js"></script>
   <script src="/static/js/utils.js"></script>
+  <script src="/static/js/effects.js"></script>
+  <script src="/static/js/cursor.js"></script>
   <script>
     async function initDashboard() {
       try {
@@ -190,11 +221,20 @@
           API.getTasks().catch(() => [])
         ]);
 
-        // Stats
+        const totalTasks = tasks.length;
+        const doneTasks = tasks.filter(t => t.status === 'done').length;
+        const unassigned = tasks.filter(t => !t.assigned_to).length;
+
+        // Stats Numbers
         document.getElementById('stat-members').textContent = members.length;
-        document.getElementById('stat-tasks').textContent = tasks.length;
-        document.getElementById('stat-done').textContent = tasks.filter(t => t.status === 'done').length;
-        document.getElementById('stat-unassigned').textContent = tasks.filter(t => !t.assigned_to).length;
+        document.getElementById('stat-tasks').textContent = totalTasks;
+        document.getElementById('stat-done').textContent = doneTasks;
+        document.getElementById('stat-unassigned').textContent = unassigned;
+
+        // Sprint Meter Update
+        const pct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+        document.getElementById('sprint-percent-text').textContent = `${pct}% Complete (${doneTasks}/${totalTasks})`;
+        document.getElementById('sprint-meter-fill').style.width = `${pct}%`;
 
         // Recent Tasks (Last 5)
         const recentTasks = tasks.slice(-5).reverse();
@@ -253,7 +293,23 @@
       }
       
       refreshIcons();
+      initTiltEffect();
       loadSummary();
+    }
+
+    async function quickAiAssign(btn) {
+      setLoading(btn, true);
+      try {
+        const res = await API.aiAssign();
+        showToast(res.message || 'AI Auto-Assignment complete!', 'success');
+        triggerConfetti();
+        initDashboard();
+      } catch (err) {
+        showToast(err.message || 'Assignment failed', 'error');
+      } finally {
+        setLoading(btn, false, '<i data-lucide="bot" style="width:18px; height:18px;"></i> 🤖 Run AI Auto-Assign');
+        refreshIcons();
+      }
     }
 
     async function loadSummary() {
@@ -293,7 +349,6 @@
       body.innerHTML += `<div class="chat-msg user"><strong>You:</strong> ${msg}</div>`;
       body.scrollTop = body.scrollHeight;
 
-      // Temporary typing indicator
       const typingId = 'typing-' + Date.now();
       body.innerHTML += `<div class="chat-msg ai" id="${typingId}"><em>Thinking... 🤖</em></div>`;
       body.scrollTop = body.scrollHeight;
@@ -316,6 +371,7 @@
     window.onload = () => {
       initDashboard();
       refreshIcons();
+      initTiltEffect();
     };
   </script>
 </body>
