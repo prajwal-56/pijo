@@ -3,41 +3,84 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tasks - PIJO</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>Task Board ⚡ PIJO AI Task Manager</title>
   <link rel="stylesheet" href="/static/css/style.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Marked.js Markdown Parser -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- DOMPurify -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
 </head>
 <body>
   <div class="app-container">
+    <!-- Sidebar -->
     <aside class="sidebar">
-      <div class="logo">
-        <span>●</span> PIJO
+      <div class="logo-container">
+        <a href="/" style="text-decoration:none;">
+          <div class="logo">
+            <span class="logo-dot"></span>
+            PIJO
+          </div>
+        </a>
+        <div class="sidebar-badge">⚡ AI Task Manager</div>
       </div>
+
       <nav class="nav-links">
-        <a href="/" class="nav-link">Dashboard</a>
-        <a href="/static/members.html" class="nav-link">Members</a>
-        <a href="/static/tasks.html" class="nav-link active">Tasks</a>
+        <a href="/" class="nav-link">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="/members" class="nav-link">
+          <i data-lucide="users"></i>
+          <span>Members</span>
+        </a>
+        <a href="/tasks" class="nav-link active">
+          <i data-lucide="kanban"></i>
+          <span>Task Board</span>
+        </a>
       </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-sticker">
+          🤖 <strong>AI ENGINE</strong><br>
+          <span style="font-size:0.7rem; font-weight:600; opacity:0.85;">Skill-weighted matching</span>
+        </div>
+      </div>
     </aside>
 
+    <!-- Main Content -->
     <main class="main-content">
-      <header class="page-header" style="margin-bottom: 1.5rem;">
+      <header class="page-header" style="flex-wrap: wrap;">
         <div>
-          <h1>Task Board</h1>
-          <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">Create, upload CSV, and let AI assign & prioritize tasks</p>
+          <h1 class="page-title"><span class="highlight">Agile Board</span> 📋</h1>
+          <p class="page-subtitle">Interactive Kanban board with automated AI task allocation & priority scoring</p>
         </div>
-        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        
+        <!-- Action Toolbar -->
+        <div style="display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center;">
           <input type="file" id="csv-upload" accept=".csv" style="display:none" onchange="uploadCSV(event)">
-          <button class="btn" onclick="document.getElementById('csv-upload').click()">📁 Upload CSV</button>
-          <button class="btn" onclick="openAddTaskModal()">➕ Add Task</button>
-          <button class="btn btn-primary" id="btn-ai-assign" onclick="aiAssign(this)">🤖 AI Assign All</button>
-          <button class="btn btn-primary" id="btn-ai-prioritize" onclick="aiPrioritize(this)">📊 AI Prioritize</button>
-          <button class="btn btn-danger" onclick="clearAllTasks()">🗑 Clear All</button>
+          <button class="btn btn-yellow" onclick="document.getElementById('csv-upload').click()">
+            <i data-lucide="file-up" style="width:16px; height:16px;"></i> Upload CSV
+          </button>
+          <button class="btn btn-cyan" onclick="openAddTaskModal()">
+            <i data-lucide="plus" style="width:16px; height:16px;"></i> Add Task
+          </button>
+          <button class="btn btn-pink" id="btn-ai-assign" onclick="aiAssign(this)">
+            <i data-lucide="bot" style="width:16px; height:16px;"></i> 🤖 AI Assign All
+          </button>
+          <button class="btn btn-purple" id="btn-ai-prioritize" onclick="aiPrioritize(this)">
+            <i data-lucide="bar-chart-2" style="width:16px; height:16px;"></i> 📊 Prioritize
+          </button>
+          <button class="btn btn-danger" onclick="clearAllTasks()" title="Clear all tasks">
+            <i data-lucide="trash-2" style="width:16px; height:16px;"></i>
+          </button>
         </div>
       </header>
 
+      <!-- Kanban 4-Column Board -->
       <div class="kanban-board" id="kanban-board">
-        <!-- Columns injected by JS -->
+        <!-- Injected via JavaScript -->
       </div>
     </main>
   </div>
@@ -45,30 +88,66 @@
   <!-- Add Task Modal -->
   <div class="modal-overlay" id="add-task-modal">
     <div class="modal-content">
-      <h3 style="margin-bottom: 1rem;">Add New Task</h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+        <h3 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 900;">
+          ➕ Add New Task
+        </h3>
+        <button class="btn btn-sm btn-yellow" onclick="closeAddTaskModal()">✕</button>
+      </div>
       <form id="add-task-form" onsubmit="handleAddTask(event)">
         <div class="form-group">
           <label class="form-label">Task Title *</label>
-          <input type="text" name="title" class="form-control" placeholder="e.g. Implement authentication flow" required>
+          <input type="text" name="title" class="form-control" placeholder="e.g. Implement User OAuth Flow" required>
         </div>
         <div class="form-group">
-          <label class="form-label">Description / Requirements</label>
-          <textarea name="description" class="form-control" placeholder="Details about what needs to be built..."></textarea>
+          <label class="form-label">Requirements / Context</label>
+          <textarea name="description" class="form-control" placeholder="Describe the technical requirements and goals..."></textarea>
         </div>
         <div class="form-group">
-          <label class="form-label">Priority</label>
+          <label class="form-label">Initial Priority</label>
           <select name="priority" class="form-control">
-            <option value="low">Low</option>
-            <option value="medium" selected>Medium</option>
-            <option value="high">High</option>
-            <option value="critical">Critical</option>
+            <option value="low">🌱 Low</option>
+            <option value="medium" selected>🔹 Medium</option>
+            <option value="high">⚡ High</option>
+            <option value="critical">🔥 Critical</option>
           </select>
         </div>
-        <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.5rem;">
+        <div style="display:flex; justify-content:flex-end; gap:0.6rem; margin-top:1.5rem;">
           <button type="button" class="btn" onclick="closeAddTaskModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="btn-save-task">Save Task</button>
+          <button type="submit" class="btn btn-pink" id="btn-save-task">
+            <i data-lucide="check" style="width:16px; height:16px;"></i> Save Task
+          </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- AI Chat Floating Button -->
+  <button class="chat-widget-btn" onclick="toggleChat()" title="Open PIJO AI Chatbot">
+    <i data-lucide="bot" style="width:24px; height:24px;"></i>
+    <span>Ask PIJO AI</span>
+  </button>
+
+  <!-- AI Chat Modal -->
+  <div class="chat-modal" id="chat-modal">
+    <div class="chat-header">
+      <div style="display:flex; align-items:center; gap:0.5rem;">
+        <span style="font-size:1.3rem;">🤖</span>
+        <span>PIJO AI Board Assistant</span>
+      </div>
+      <button onclick="toggleChat()" title="Close chat">✕</button>
+    </div>
+    <div class="chat-body" id="chat-body">
+      <div class="chat-msg ai">
+        <strong>👋 Board Assistant ready!</strong>
+        Ask me why tasks were assigned to specific teammates or how to balance current sprint workloads.
+      </div>
+    </div>
+    <div class="chat-footer">
+      <input type="text" id="chat-input" class="form-control" placeholder="Ask about tasks or workload..." onkeypress="if(event.key==='Enter') sendChat()">
+      <button class="btn btn-primary" onclick="sendChat()" style="padding:0.6rem 1rem;">
+        <i data-lucide="send" style="width:16px; height:16px;"></i>
+      </button>
     </div>
   </div>
 
@@ -77,11 +156,11 @@
   <script>
     let membersList = [];
     
-    const statuses = [
-      { id: 'todo', label: 'To Do' },
-      { id: 'in_progress', label: 'In Progress' },
-      { id: 'done', label: 'Done' },
-      { id: 'blocked', label: 'Blocked' }
+    const columns = [
+      { id: 'todo', label: 'To Do', emoji: '🟡', class: 'col-todo' },
+      { id: 'in_progress', label: 'In Progress', emoji: '🔵', class: 'col-in_progress' },
+      { id: 'done', label: 'Done', emoji: '🟢', class: 'col-done' },
+      { id: 'blocked', label: 'Blocked', emoji: '🔴', class: 'col-blocked' }
     ];
 
     async function initTasks() {
@@ -89,7 +168,7 @@
         membersList = await API.getMembers().catch(() => []);
         loadTasks();
       } catch(err) {
-        showToast('Error initializing task board', 'error');
+        showToast('Error initializing task board: ' + err.message, 'error');
       }
     }
 
@@ -98,23 +177,25 @@
       try {
         const tasks = await API.getTasks();
         
-        board.innerHTML = statuses.map(status => {
-          const colTasks = tasks.filter(t => t.status === status.id);
+        board.innerHTML = columns.map(col => {
+          const colTasks = tasks.filter(t => t.status === col.id);
           return `
-            <div class="kanban-column">
+            <div class="kanban-column ${col.class}">
               <div class="kanban-header">
-                <span>${status.label}</span>
-                <span class="badge badge-gray">${colTasks.length}</span>
+                <span>${col.emoji} ${col.label}</span>
+                <span class="badge badge-gray" style="background:#FFF;">${colTasks.length}</span>
               </div>
               <div class="kanban-cards">
                 ${colTasks.map(t => renderTaskCard(t)).join('')}
-                ${colTasks.length === 0 ? '<div style="color:var(--text-muted); text-align:center; padding:2rem 1rem; font-size:0.85rem; font-style:italic;">No tasks here</div>' : ''}
+                ${colTasks.length === 0 ? '<div style="color:rgba(18,18,18,0.5); text-align:center; padding:2.5rem 1rem; font-weight:700; font-size:0.85rem; font-style:italic;">No tasks in this lane</div>' : ''}
               </div>
             </div>
           `;
         }).join('');
       } catch (err) {
         showToast('Failed to load tasks', 'error');
+      } finally {
+        refreshIcons();
       }
     }
 
@@ -122,31 +203,40 @@
       const assignedMember = membersList.find(m => m.id === task.assigned_to);
       
       const memberOpts = `<option value="">Unassigned</option>` + 
-        membersList.map(m => `<option value="${m.id}" ${m.id === task.assigned_to ? 'selected' : ''}>${m.name}</option>`).join('');
+        membersList.map(m => `<option value="${m.id}" ${m.id === task.assigned_to ? 'selected' : ''}>👤 ${m.name}</option>`).join('');
 
-      const statusOpts = statuses.map(s => `<option value="${s.id}" ${s.id === task.status ? 'selected' : ''}>${s.label}</option>`).join('');
+      const statusOpts = columns.map(c => `<option value="${c.id}" ${c.id === task.status ? 'selected' : ''}>${c.emoji} ${c.label}</option>`).join('');
 
       return `
         <div class="task-card">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
             ${priorityBadge(task.priority)}
-            <button class="btn btn-danger" style="padding:0.15rem 0.45rem; font-size:0.7rem; line-height:1;" onclick="deleteTask('${task.id}')" title="Delete task">✕</button>
+            <button class="btn btn-sm btn-danger" style="padding:0.15rem 0.45rem; font-size:0.65rem;" onclick="deleteTask('${task.id}')" title="Delete Task">✕</button>
           </div>
           <h4>${task.title}</h4>
-          ${task.description ? `<p title="${task.description}">${task.description}</p>` : ''}
+          ${task.description ? `<p>${task.description}</p>` : ''}
           
-          ${task.assigned_reason ? `<div style="font-size:0.75rem; color:var(--info); margin-bottom:0.6rem; background:rgba(59,130,246,0.1); border-left:3px solid var(--info); padding:0.4rem 0.5rem; border-radius:3px;">💡 <strong>AI Fit:</strong> ${task.assigned_reason}</div>` : ''}
+          ${task.assigned_reason ? `
+            <div class="ai-reason-bubble">
+              💡 <strong>AI Fit:</strong> ${task.assigned_reason}
+            </div>` : ''}
+
+          ${assignedMember ? `
+            <div style="margin-bottom:0.75rem; display:flex; align-items:center; gap:0.45rem;">
+              ${renderMemberAvatar(assignedMember, '')}
+              <span style="font-size:0.8rem; font-weight:800; font-family:var(--font-heading);">${assignedMember.name}</span>
+            </div>` : ''}
           
           <div class="task-footer">
             <div style="width: 48%;">
-              <label class="form-label" style="font-size:0.7rem; margin-bottom:0.2rem;">Status</label>
-              <select class="form-control" style="padding:0.25rem 0.4rem; font-size:0.75rem;" onchange="updateStatus('${task.id}', this.value)">
+              <label class="form-label" style="font-size:0.65rem; margin-bottom:0.2rem;">Lane</label>
+              <select class="form-control" style="padding:0.35rem 0.5rem; font-size:0.75rem; font-weight:700;" onchange="updateStatus('${task.id}', this.value)">
                 ${statusOpts}
               </select>
             </div>
             <div style="width: 48%;">
-              <label class="form-label" style="font-size:0.7rem; margin-bottom:0.2rem;">Assignee</label>
-              <select class="form-control" style="padding:0.25rem 0.4rem; font-size:0.75rem;" onchange="assignTask('${task.id}', this.value)">
+              <label class="form-label" style="font-size:0.65rem; margin-bottom:0.2rem;">Assignee</label>
+              <select class="form-control" style="padding:0.35rem 0.5rem; font-size:0.75rem; font-weight:700;" onchange="assignTask('${task.id}', this.value)">
                 ${memberOpts}
               </select>
             </div>
@@ -182,14 +272,15 @@
       setLoading(btn, true);
       try {
         await API.createTask(data);
-        showToast('Task created!', 'success');
+        showToast('Task added to board!', 'success');
         closeAddTaskModal();
         form.reset();
         loadTasks();
       } catch (err) {
         showToast(err.message, 'error');
       } finally {
-        setLoading(btn, false, 'Save Task');
+        setLoading(btn, false, '<i data-lucide="check" style="width:16px; height:16px;"></i> Save Task');
+        refreshIcons();
       }
     }
 
@@ -215,7 +306,7 @@
       if(!confirm('Delete this task?')) return;
       try {
         await API.deleteTask(id);
-        showToast('Task removed', 'success');
+        showToast('Task deleted', 'success');
         loadTasks();
       } catch (err) {
         showToast(err.message, 'error');
@@ -237,12 +328,13 @@
       setLoading(btn, true);
       try {
         const res = await API.aiAssign();
-        showToast(res.message || 'AI Assignment complete!', 'success');
+        showToast(res.message || 'AI Auto-Assignment complete!', 'success');
         loadTasks();
       } catch (err) {
         showToast(err.message || 'AI assignment failed', 'error');
       } finally {
-        setLoading(btn, false, '🤖 AI Assign All');
+        setLoading(btn, false, '<i data-lucide="bot" style="width:16px; height:16px;"></i> 🤖 AI Assign All');
+        refreshIcons();
       }
     }
 
@@ -255,11 +347,52 @@
       } catch (err) {
         showToast(err.message || 'AI prioritization failed', 'error');
       } finally {
-        setLoading(btn, false, '📊 AI Prioritize');
+        setLoading(btn, false, '<i data-lucide="bar-chart-2" style="width:16px; height:16px;"></i> 📊 Prioritize');
+        refreshIcons();
       }
     }
 
-    window.onload = initTasks;
+    function toggleChat() {
+      const modal = document.getElementById('chat-modal');
+      modal.classList.toggle('active');
+      if (modal.classList.contains('active')) {
+        document.getElementById('chat-input').focus();
+      }
+    }
+
+    async function sendChat() {
+      const input = document.getElementById('chat-input');
+      const body = document.getElementById('chat-body');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      input.value = '';
+      body.innerHTML += `<div class="chat-msg user"><strong>You:</strong> ${msg}</div>`;
+      body.scrollTop = body.scrollHeight;
+
+      const typingId = 'typing-' + Date.now();
+      body.innerHTML += `<div class="chat-msg ai" id="${typingId}"><em>Analyzing board... 🤖</em></div>`;
+      body.scrollTop = body.scrollHeight;
+
+      try {
+        const res = await API.chat(msg);
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+
+        const rendered = renderMarkdown(res.response || 'No response.');
+        body.innerHTML += `<div class="chat-msg ai">${rendered}</div>`;
+      } catch (err) {
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+        body.innerHTML += `<div class="chat-msg ai" style="background:#FFEAEA; border-color:#FF5252;"><strong>Error:</strong> ${err.message}</div>`;
+      }
+      body.scrollTop = body.scrollHeight;
+    }
+
+    window.onload = () => {
+      initTasks();
+      refreshIcons();
+    };
   </script>
 </body>
 </html>

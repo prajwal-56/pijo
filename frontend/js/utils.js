@@ -1,4 +1,37 @@
-// utils.js — Shared Utilities & UI Helpers
+// utils.js — Neobrutalism UI Helpers & Markdown Parser
+
+// Safe Markdown Parser helper
+function renderMarkdown(content) {
+  if (!content) return '';
+  if (window.marked && typeof window.marked.parse === 'function') {
+    try {
+      const parsed = window.marked.parse(content, { breaks: true, gfm: true });
+      if (window.DOMPurify && typeof window.DOMPurify.sanitize === 'function') {
+        return window.DOMPurify.sanitize(parsed);
+      }
+      return parsed;
+    } catch (e) {
+      console.warn('Marked parse error, using fallback:', e);
+    }
+  }
+
+  // Fallback simple markdown parser if library is offline
+  let html = content
+    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+    .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+    .replace(/\*(.*)\*/gim, '<em>$1</em>')
+    .replace(/`([^`]+)`/gim, '<code>$1</code>')
+    .replace(/^\s*-\s+(.*$)/gim, '<li>$1</li>')
+    .replace(/\n\n/gim, '</p><p>');
+
+  if (html.includes('<li>')) {
+    html = html.replace(/(<li>.*<\/li>)/gim, '<ul>$1</ul>');
+  }
+
+  return `<p>${html}</p>`;
+}
 
 function showToast(message, type = 'info') {
   let container = document.getElementById('toast-container');
@@ -10,9 +43,15 @@ function showToast(message, type = 'info') {
 
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
-  const icons = { success: '✓', error: '✕', info: 'ℹ', warning: '⚠' };
+  const icons = {
+    success: '🚀',
+    error: '💥',
+    info: '💡',
+    warning: '⚠️'
+  };
+
   toast.innerHTML = `
-    <span style="font-weight:bold;">${icons[type] || 'ℹ'}</span>
+    <span style="font-size:1.15rem;">${icons[type] || '⚡'}</span>
     <span>${message}</span>
   `;
   container.appendChild(toast);
@@ -21,15 +60,15 @@ function showToast(message, type = 'info') {
   setTimeout(() => {
     toast.classList.remove('show');
     setTimeout(() => toast.remove(), 300);
-  }, 3500);
+  }, 3800);
 }
 
 function statusBadge(status) {
   const map = {
-    todo: ['gray', 'To Do'],
-    in_progress: ['blue', 'In Progress'],
-    done: ['green', 'Done'],
-    blocked: ['red', 'Blocked'],
+    todo: ['yellow', '🟡 To Do'],
+    in_progress: ['blue', '🔵 In Progress'],
+    done: ['green', '🟢 Done'],
+    blocked: ['red', '🔴 Blocked'],
   };
   const [color, label] = map[status] || ['gray', status || 'To Do'];
   return `<span class="badge badge-${color}">${label}</span>`;
@@ -37,9 +76,9 @@ function statusBadge(status) {
 
 function priorityBadge(priority) {
   const map = {
-    low: ['green', '↓ Low'],
-    medium: ['yellow', '→ Med'],
-    high: ['orange', '↑ High'],
+    low: ['green', '🌱 Low'],
+    medium: ['yellow', '🔹 Med'],
+    high: ['orange', '⚡ High'],
     critical: ['red', '🔥 Critical'],
   };
   const [color, label] = map[priority] || ['gray', priority || 'Medium'];
@@ -74,7 +113,7 @@ function setLoading(btn, loading, text = null) {
   if (!btn) return;
   if (loading) {
     btn.dataset.origText = btn.innerHTML;
-    btn.innerHTML = '<span class="spinner"></span>';
+    btn.innerHTML = '<span class="spinner"></span> Working...';
     btn.disabled = true;
   } else {
     btn.innerHTML = text || btn.dataset.origText || 'Submit';
@@ -82,6 +121,14 @@ function setLoading(btn, loading, text = null) {
   }
 }
 
+// Refresh Lucide icons if loaded
+function refreshIcons() {
+  if (window.lucide && typeof window.lucide.createIcons === 'function') {
+    window.lucide.createIcons();
+  }
+}
+
+window.renderMarkdown = renderMarkdown;
 window.showToast = showToast;
 window.statusBadge = statusBadge;
 window.priorityBadge = priorityBadge;
@@ -89,3 +136,4 @@ window.avatarInitials = avatarInitials;
 window.renderMemberAvatar = renderMemberAvatar;
 window.relativeTime = relativeTime;
 window.setLoading = setLoading;
+window.refreshIcons = refreshIcons;
