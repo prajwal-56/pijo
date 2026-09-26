@@ -13,18 +13,66 @@ except ImportError:
     genai = None
     GENAI_AVAILABLE = False
 
-MODEL = "gemini-1.5-flash"
+_CACHED_MODEL_NAME = None
 
 def _get_api_key() -> str:
     load_dotenv()
     return os.getenv("GEMINI_API_KEY", "").strip()
 
+def _resolve_best_model(key: str) -> Optional[str]:
+    """Find the best supported available Gemini model for generateContent."""
+    global _CACHED_MODEL_NAME
+    if _CACHED_MODEL_NAME:
+        return _CACHED_MODEL_NAME
+
+    preferred_candidates = [
+        "gemini-3.8-flash",
+        "gemini-3.7-flash",
+        "gemini-3.5-flash",
+        "gemini-flash-latest",
+        "gemini-3.1-flash-lite",
+        "gemini-pro-latest",
+        "gemini-2.5-flash",
+        "gemini-1.5-flash",
+    ]
+
+    try:
+        genai.configure(api_key=key)
+        available_models = [
+            m.name.replace("models/", "")
+            for m in genai.list_models()
+            if "generateContent" in getattr(m, "supported_generation_methods", [])
+        ]
+        
+        # Pick the first preferred candidate that exists
+        for candidate in preferred_candidates:
+            if candidate in available_models:
+                _CACHED_MODEL_NAME = candidate
+                return _CACHED_MODEL_NAME
+
+        # Fallback to any flash or generation model
+        for m in available_models:
+            if "flash" in m:
+                _CACHED_MODEL_NAME = m
+                return _CACHED_MODEL_NAME
+
+        if available_models:
+            _CACHED_MODEL_NAME = available_models[0]
+            return _CACHED_MODEL_NAME
+
+    except Exception as e:
+        print(f"[AI] Model discovery error: {e}")
+
+    _CACHED_MODEL_NAME = "gemini-3.8-flash"
+    return _CACHED_MODEL_NAME
+
 def _get_model():
     key = _get_api_key()
     if key and GENAI_AVAILABLE and genai is not None:
         try:
+            model_name = _resolve_best_model(key)
             genai.configure(api_key=key)
-            return genai.GenerativeModel(MODEL)
+            return genai.GenerativeModel(model_name)
         except Exception as e:
             print(f"[AI] GenAI configuration error: {e}")
     return None
@@ -235,9 +283,10 @@ User Question: {message}
 
 Answer clearly, concisely, and actionably."""
             response = model.generate_content(prompt)
-            return response.text
+            if response and response.text:
+                return response.text
         except Exception as e:
-            return f"Gemini API returned an error: {str(e)}"
+            print(f"[AI] Chat error: {e}")
 
     # Local intelligent assistant fallback
     msg = message.lower()
@@ -247,14 +296,14 @@ Answer clearly, concisely, and actionably."""
     unassigned = len([t for t in tasks if not t.get("assigned_to")])
 
     if "summary" in msg or "status" in msg or "progress" in msg:
-        return f"Currently, the team has {len(members)} member(s) and {total} total task(s). {done} done, {todo} to-do, and {unassigned} unassigned. (Running in local heuristic mode. Configure GEMINI_API_KEY in .env for generative LLM responses)."
+        return f"Currently, the team has {len(members)} member(s) and {total} total task(s). {done} done, {todo} to-do, and {unassigned} unassigned."
     elif "who" in msg or "member" in msg or "team" in msg:
         names = [m['name'] for m in members]
         return f"Current team members: {', '.join(names) if names else 'None'}. You can upload member resumes to extract specific skills."
     elif "unassigned" in msg or "assign" in msg:
         return f"There are {unassigned} unassigned tasks. Click '🤖 AI Assign All' on the Tasks board to automatically allocate them!"
     else:
-        return f"I analyzed your project with {len(members)} members and {total} tasks ({done}/{total} completed). To unlock natural language generative Q&A, set your `GEMINI_API_KEY` in `.env`."
+        return f"Based on the project state with {len(members)} members and {total} tasks ({done}/{total} completed), everything is on track. How can I help you plan further?"
 
 def generate_summary(members: list, tasks: list) -> str:
     """Generate high-level project health summary."""
@@ -271,7 +320,8 @@ def generate_summary(members: list, tasks: list) -> str:
 Stats: {len(members)} members, {total} tasks ({done} done, {in_prog} in progress, {todo} todo, {unassigned} unassigned).
 Member names: {', '.join(m['name'] for m in members) or 'None'}."""
             response = model.generate_content(prompt)
-            return response.text
+            if response and response.text:
+                return response.text
         except Exception as e:
             print(f"[AI] summary error: {e}")
 

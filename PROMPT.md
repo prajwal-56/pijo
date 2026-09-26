@@ -9,4 +9,5 @@ And then, we upload a markdown based resume or some doc - which basically contai
 we also upload a tracker - in simple csv file or something like that - which basically contains the tasklist - and a small description of what the task is. and that's it - initially ,it doesn't involve to whom this is assigned. it's done by the ai. the ai allocates everything.
 
 The above is the basic inital draft. I want you to draft a real feasible plan for this project. Like a real plan that works. I don't care if it's too much. I just want it to work. the plan should contain everything. 
-There should also be a minimal log or tracker in which each ai agent can read that and understand the state of the project and how much we've built so far and what is yet to build and everything like that. I want you to draft a plan and then build on top of that
+There should also be a minimal log or tracker in which each ai agent can read that and understand the state of the project and how much we've built so far and what is yet to build and everything like that. I want you to draft a plan and then build on top of that.
+
