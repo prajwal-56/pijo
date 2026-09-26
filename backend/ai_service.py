@@ -13,68 +13,43 @@ except ImportError:
     genai = None
     GENAI_AVAILABLE = False
 
-_CACHED_MODEL_NAME = None
+# Active Gemini models with automatic failover
+ACTIVE_MODELS = [
+    "gemini-3.7-flash",
+    "gemini-3.5-flash",
+    "gemini-3.1-flash-lite",
+    "gemini-flash-lite-latest",
+    "gemma-4-26b-a4b-it",
+    "gemini-3.8-flash",
+]
 
 def _get_api_key() -> str:
     load_dotenv()
     return os.getenv("GEMINI_API_KEY", "").strip()
 
-def _resolve_best_model(key: str) -> Optional[str]:
-    """Find the best supported available Gemini model for generateContent."""
-    global _CACHED_MODEL_NAME
-    if _CACHED_MODEL_NAME:
-        return _CACHED_MODEL_NAME
-
-    preferred_candidates = [
-        "gemini-3.8-flash",
-        "gemini-3.7-flash",
-        "gemini-3.5-flash",
-        "gemini-flash-latest",
-        "gemini-3.1-flash-lite",
-        "gemini-pro-latest",
-        "gemini-2.5-flash",
-        "gemini-1.5-flash",
-    ]
+def _generate_content(prompt: str) -> Optional[str]:
+    """Execute generate_content with dynamic multi-model failover."""
+    key = _get_api_key()
+    if not key or not GENAI_AVAILABLE or genai is None:
+        return None
 
     try:
         genai.configure(api_key=key)
-        available_models = [
-            m.name.replace("models/", "")
-            for m in genai.list_models()
-            if "generateContent" in getattr(m, "supported_generation_methods", [])
-        ]
-        
-        # Pick the first preferred candidate that exists
-        for candidate in preferred_candidates:
-            if candidate in available_models:
-                _CACHED_MODEL_NAME = candidate
-                return _CACHED_MODEL_NAME
-
-        # Fallback to any flash or generation model
-        for m in available_models:
-            if "flash" in m:
-                _CACHED_MODEL_NAME = m
-                return _CACHED_MODEL_NAME
-
-        if available_models:
-            _CACHED_MODEL_NAME = available_models[0]
-            return _CACHED_MODEL_NAME
-
     except Exception as e:
-        print(f"[AI] Model discovery error: {e}")
+        print(f"[AI] GenAI configure error: {e}")
+        return None
 
-    _CACHED_MODEL_NAME = "gemini-3.8-flash"
-    return _CACHED_MODEL_NAME
-
-def _get_model():
-    key = _get_api_key()
-    if key and GENAI_AVAILABLE and genai is not None:
+    for model_name in ACTIVE_MODELS:
         try:
-            model_name = _resolve_best_model(key)
-            genai.configure(api_key=key)
-            return genai.GenerativeModel(model_name)
+            m = genai.GenerativeModel(model_name)
+            res = m.generate_content(prompt)
+            if res and res.text:
+                return res.text
         except Exception as e:
-            print(f"[AI] GenAI configuration error: {e}")
+            # If quota or model error, try next candidate model
+            err_msg = str(e).split('\n')[0]
+            print(f"[AI] Model {model_name} error ({err_msg[:60]}), trying next candidate...")
+            continue
     return None
 
 def _extract_json(text: str):
@@ -99,21 +74,21 @@ def extract_skills(resume_text: str) -> List[str]:
     if not resume_text or not resume_text.strip():
         return []
     
-    model = _get_model()
-    if model:
-        try:
-            prompt = f"""Extract a list of technical and key domain skills from the following resume/profile text.
+    prompt = f"""Extract a list of technical and key domain skills from the following resume/profile text.
 Return ONLY a JSON array of strings (max 10 skills). Example: ["Python", "React", "Docker"]
 Do not include any other commentary.
 
 Resume:
 {resume_text}"""
-            response = model.generate_content(prompt)
-            skills = _extract_json(response.text)
+
+    raw = _generate_content(prompt)
+    if raw:
+        try:
+            skills = _extract_json(raw)
             if isinstance(skills, list):
                 return [str(s) for s in skills[:12]]
         except Exception as e:
-            print(f"[AI] extract_skills API error (using heuristic): {e}")
+            print(f"[AI] extract_skills JSON parse error: {e}")
 
     # Heuristic fallback if no API key or API call failed
     found = []
@@ -131,23 +106,20 @@ def assign_tasks(members: list, tasks: list) -> list:
     if not members or not tasks:
         return []
 
-    model = _get_model()
-    if model:
-        try:
-            members_summary = []
-            for m in members:
-                skills_str = ", ".join(m.get("skills", [])) or "General development"
-                members_summary.append(
-                    f"- ID: {m['id']}\n  Name: {m['name']}\n  Skills: {skills_str}\n  Bio: {m.get('bio', '')}\n  Resume: {m.get('resume_text', '')[:400]}"
-                )
-            
-            tasks_summary = []
-            for t in tasks:
-                tasks_summary.append(
-                    f"- ID: {t['id']}\n  Title: {t['title']}\n  Description: {t.get('description', '')}"
-                )
+    members_summary = []
+    for m in members:
+        skills_str = ", ".join(m.get("skills", [])) or "General development"
+        members_summary.append(
+            f"- ID: {m['id']}\n  Name: {m['name']}\n  Skills: {skills_str}\n  Bio: {m.get('bio', '')}\n  Resume: {m.get('resume_text', '')[:400]}"
+        )
+    
+    tasks_summary = []
+    for t in tasks:
+        tasks_summary.append(
+            f"- ID: {t['id']}\n  Title: {t['title']}\n  Description: {t.get('description', '')}"
+        )
 
-            prompt = f"""You are an expert project manager AI. Assign each task to the most suitable team member based on their skills and background. Balance the workload when possible.
+    prompt = f"""You are an expert project manager AI. Assign each task to the most suitable team member based on their skills and background. Balance the workload when possible.
 
 TEAM MEMBERS:
 {chr(10).join(members_summary)}
@@ -158,94 +130,113 @@ TASKS TO ASSIGN:
 Return ONLY a JSON array. Each element must have:
 - task_id: the task ID string
 - member_id: the best-fit member ID string
-- reason: 1-2 concise sentences explaining why this member is the best fit
-- priority: one of "low", "medium", "high", "critical"
+- reason: 1-2 sentence explanation of why this member fits best
+- priority: one of "low", "medium", "high", "critical" based on importance
 
-Example format:
+Example:
 [
-  {{"task_id": "...", "member_id": "...", "reason": "...", "priority": "high"}}
-]"""
-            response = model.generate_content(prompt)
-            assignments = _extract_json(response.text)
+  {{"task_id": "abc", "member_id": "xyz", "reason": "Sarah has strong React & UI skills required for this component.", "priority": "high"}}
+]
+
+Do not include any extra text."""
+
+    raw = _generate_content(prompt)
+    if raw:
+        try:
+            assignments = _extract_json(raw)
             if isinstance(assignments, list) and len(assignments) > 0:
                 return assignments
         except Exception as e:
-            print(f"[AI] assign_tasks API error (using heuristic fallback): {e}")
+            print(f"[AI] assign_tasks JSON parse error: {e}")
 
-    # Heuristic fallback matching algorithm
-    results = []
+    # Fallback heuristic assignment algorithm
+    print("[AI] Using keyword heuristic for task assignment")
+    return _heuristic_assign_tasks(members, tasks)
+
+def _heuristic_assign_tasks(members: list, tasks: list) -> list:
+    """
+    Deterministic skill-matching heuristic that scores member suitability
+    based on resume skills and task keywords, while balancing workload.
+    """
+    assignments = []
     member_workload = {m["id"]: 0 for m in members}
 
-    for t in tasks:
-        t_text = f"{t.get('title', '')} {t.get('description', '')}".lower()
-        best_member = members[0]
+    for task in tasks:
+        task_text = f"{task.get('title', '')} {task.get('description', '')}".lower()
+        best_member = None
         best_score = -1
-        best_reason = "Assigned for team workload balance"
+        matching_skills = []
 
         for m in members:
             score = 0
-            matched_skills = []
-            m_skills = m.get("skills", [])
-            for s in m_skills:
-                if s.lower() in t_text:
+            member_skills = m.get("skills", [])
+            member_matched = []
+            
+            for skill in member_skills:
+                if skill.lower() in task_text:
                     score += 3
-                    matched_skills.append(s)
+                    member_matched.append(skill)
             
-            if m.get("bio") and any(w in t_text for w in m.get("bio", "").lower().split()):
-                score += 1
-            
-            # Penalize overloaded members slightly
-            score -= (member_workload[m["id"]] * 0.5)
+            bio_text = f"{m.get('bio', '')} {m.get('resume_text', '')[:300]}".lower()
+            for word in task_text.split():
+                if len(word) > 4 and word in bio_text:
+                    score += 1
+
+            # Workload balancing penalty
+            score -= (member_workload[m["id"]] * 1.5)
 
             if score > best_score:
                 best_score = score
                 best_member = m
-                if matched_skills:
-                    best_reason = f"Strong skill match in {', '.join(matched_skills[:2])}"
-                else:
-                    best_reason = "Balanced project allocation"
+                matching_skills = member_matched
+
+        if not best_member:
+            best_member = min(members, key=lambda m: member_workload[m["id"]])
 
         member_workload[best_member["id"]] += 1
 
-        # Priority calculation heuristic
-        priority = "medium"
-        if any(w in t_text for w in ["critical", "bug", "urgent", "security", "deploy", "prod"]):
-            priority = "critical"
-        elif any(w in t_text for w in ["api", "database", "backend", "auth", "core"]):
-            priority = "high"
-        elif any(w in t_text for w in ["docs", "readme", "comment", "minor", "cleanup"]):
-            priority = "low"
+        if matching_skills:
+            reason = f"Strong skill match in {', '.join(matching_skills[:3])}"
+        elif best_member.get("bio"):
+            reason = f"Aligned with role: {best_member['bio'][:50]}"
+        else:
+            reason = "Balanced project allocation"
 
-        results.append({
-            "task_id": t["id"],
+        assignments.append({
+            "task_id": task["id"],
             "member_id": best_member["id"],
-            "reason": best_reason,
-            "priority": t.get("priority") if t.get("priority") in ["low", "medium", "high", "critical"] else priority
+            "reason": reason,
+            "priority": task.get("priority", "medium")
         })
 
-    return results
+    return assignments
 
 def prioritize_tasks(tasks: list) -> list:
-    """Prioritizes tasks by importance and complexity."""
+    """Assign smart priority to tasks using AI or heuristics."""
     if not tasks:
         return []
 
-    model = _get_model()
-    if model:
-        try:
-            tasks_summary = [f"- ID: {t['id']}, Title: {t['title']}, Desc: {t.get('description', '')}" for t in tasks]
-            prompt = f"""You are a technical project manager. Assign priority ('low', 'medium', 'high', 'critical') to these tasks.
+    tasks_summary = [f"- ID: {t['id']}, Title: {t['title']}, Description: {t.get('description', '')}" for t in tasks]
+
+    prompt = f"""You are a technical project manager. Prioritize these tasks for a development sprint.
+Assign each task: "low", "medium", "high", or "critical".
+
 TASKS:
 {chr(10).join(tasks_summary)}
 
 Return ONLY a JSON array:
-[{{"task_id": "...", "priority": "high", "reason": "..."}}]"""
-            response = model.generate_content(prompt)
-            res = _extract_json(response.text)
-            if isinstance(res, list):
-                return res
+[
+  {{"task_id": "...", "priority": "high", "reason": "1-sentence reason"}}
+]"""
+
+    raw = _generate_content(prompt)
+    if raw:
+        try:
+            results = _extract_json(raw)
+            if isinstance(results, list):
+                return results
         except Exception as e:
-            print(f"[AI] prioritize_tasks error: {e}")
+            print(f"[AI] prioritize_tasks JSON error: {e}")
 
     # Heuristic fallback
     results = []
@@ -259,18 +250,15 @@ Return ONLY a JSON array:
             p = "low"
         else:
             p = "medium"
-        results.append({"task_id": t["id"], "priority": p, "reason": f"Evaluated based on scope and keywords"})
+        results.append({"task_id": t["id"], "priority": p, "reason": "Evaluated based on scope and keywords"})
     return results
 
 def chat(members: list, tasks: list, message: str) -> str:
-    """Free-form AI assistant chat."""
-    model = _get_model()
-    if model:
-        try:
-            members_summary = [f"- {m['name']}: {', '.join(m.get('skills', [])) or 'General'}" for m in members]
-            tasks_summary = [f"- {t['title']} [{t.get('status', 'todo')}] -> {t.get('assigned_to_name', 'Unassigned')} ({t.get('priority', 'medium')})" for t in tasks]
+    """Free-form AI assistant chat with full project context and multi-model failover."""
+    members_summary = [f"- {m['name']}: {', '.join(m.get('skills', [])) or 'General'}" for m in members]
+    tasks_summary = [f"- {t['title']} [{t.get('status', 'todo')}] -> {t.get('assigned_to_name', 'Unassigned')} ({t.get('priority', 'medium')})" for t in tasks]
 
-            prompt = f"""You are PIJO AI, an intelligent project manager for student and agile teams.
+    prompt = f"""You are PIJO AI, an intelligent project manager for student and agile teams.
 
 PROJECT STATUS:
 Team Members ({len(members)}):
@@ -281,14 +269,13 @@ Tasks ({len(tasks)}):
 
 User Question: {message}
 
-Answer clearly, concisely, and actionably."""
-            response = model.generate_content(prompt)
-            if response and response.text:
-                return response.text
-        except Exception as e:
-            print(f"[AI] Chat error: {e}")
+Answer clearly, concisely, and actionably in clean Markdown."""
 
-    # Local intelligent assistant fallback
+    response_text = _generate_content(prompt)
+    if response_text and response_text.strip():
+        return response_text.strip()
+
+    # Local intelligent assistant fallback only if all API models fail
     msg = message.lower()
     total = len(tasks)
     done = len([t for t in tasks if t.get("status") == "done"])
@@ -301,29 +288,25 @@ Answer clearly, concisely, and actionably."""
         names = [m['name'] for m in members]
         return f"Current team members: {', '.join(names) if names else 'None'}. You can upload member resumes to extract specific skills."
     elif "unassigned" in msg or "assign" in msg:
-        return f"There are {unassigned} unassigned tasks. Click '🤖 AI Assign All' on the Tasks board to automatically allocate them!"
+        return f"There are {unassigned} unassigned tasks. Click 'Auto-Assign' on the Tasks board to automatically allocate them!"
     else:
         return f"Based on the project state with {len(members)} members and {total} tasks ({done}/{total} completed), everything is on track. How can I help you plan further?"
 
 def generate_summary(members: list, tasks: list) -> str:
     """Generate high-level project health summary."""
-    model = _get_model()
     total = len(tasks)
     done = len([t for t in tasks if t.get("status") == "done"])
     in_prog = len([t for t in tasks if t.get("status") == "in_progress"])
     todo = len([t for t in tasks if t.get("status") == "todo"])
     unassigned = len([t for t in tasks if not t.get("assigned_to")])
 
-    if model:
-        try:
-            prompt = f"""Generate a crisp, encouraging 2-sentence project progress summary.
+    prompt = f"""Generate a crisp, encouraging 2-sentence project progress summary.
 Stats: {len(members)} members, {total} tasks ({done} done, {in_prog} in progress, {todo} todo, {unassigned} unassigned).
 Member names: {', '.join(m['name'] for m in members) or 'None'}."""
-            response = model.generate_content(prompt)
-            if response and response.text:
-                return response.text
-        except Exception as e:
-            print(f"[AI] summary error: {e}")
+
+    response_text = _generate_content(prompt)
+    if response_text and response_text.strip():
+        return response_text.strip()
 
     # Clean deterministic fallback
     if total == 0:
