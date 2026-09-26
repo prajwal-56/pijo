@@ -1,0 +1,2 @@
+This project is for a hackathon. where we are judged only by the amount of things we've built and whether it's working or not.
+That's it. whichever teams built the most and which works well - They win

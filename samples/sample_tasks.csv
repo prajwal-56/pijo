@@ -1,0 +1,9 @@
+title,description,priority
+Design Responsive UI and Mobile Navigation,Create clean dashboard layouts with mobile-first CSS and Figma-inspired color schemes,high
+Implement JWT User Authentication & RBAC,Build secure endpoints for login registration and token refresh with password hashing,critical
+Integrate Gemini AI Model API for Task Allocation,Connect FastAPI backend to Google Generative AI for automatic semantic task matching,high
+Build PostgreSQL Database Schema & Migration Scripts,Design relational tables for members tasks and assignments with indexing,medium
+Setup Docker Containerization and CI/CD Pipeline,Write Dockerfile and GitHub Actions workflow for automated testing and deployment,medium
+Write API Documentation and OpenAPI Swagger Docs,Document all REST API endpoints with request and response payloads,low
+Implement Real-time WebSocket Status Updates,Enable live notifications when team members update task status on the Kanban board,medium
+Conduct Accessibility (a11y) and Performance Audits,Optimize Core Web Vitals score and ensure keyboard navigation across all views,low

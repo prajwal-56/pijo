@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Members - PIJO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="logo">
+        <span>●</span> PIJO
+      </div>
+      <nav class="nav-links">
+        <a href="/" class="nav-link">Dashboard</a>
+        <a href="/static/members.html" class="nav-link active">Members</a>
+        <a href="/static/tasks.html" class="nav-link">Tasks</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="page-header">
+        <div>
+          <h1>Team Members</h1>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">Add students, upload resumes/skills, and configure profiles</p>
+        </div>
+        <button class="btn" onclick="loadMembers()">↻ Refresh</button>
+      </header>
+
+      <div style="display: flex; gap: 2rem; align-items: flex-start;">
+        <!-- Add Member Form -->
+        <div class="card" style="width: 360px; position: sticky; top: 1.5rem;">
+          <h3 style="margin-bottom: 1.25rem; font-size: 1.15rem;">➕ Add Team Member</h3>
+          <form id="add-member-form" onsubmit="handleAddMember(event)">
+            <div class="form-group">
+              <label class="form-label">Full Name *</label>
+              <input type="text" name="name" class="form-control" placeholder="e.g. Alex Johnson" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Short Bio / Role</label>
+              <textarea name="bio" class="form-control" placeholder="e.g. Frontend developer proficient in UI/UX & React"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Profile Picture (optional)</label>
+              <input type="file" name="pfp" accept="image/*" class="form-control" style="padding:0.45rem">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Markdown / Text Resume (optional)</label>
+              <input type="file" name="resume" accept=".md,.txt,.pdf" class="form-control" style="padding:0.45rem">
+              <small style="color:var(--text-muted); font-size:0.75rem; display:block; margin-top:0.25rem;">Skills will be automatically extracted with AI</small>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;" id="btn-add-member">Create Member</button>
+          </form>
+        </div>
+
+        <!-- Members Grid -->
+        <div style="flex: 1;">
+          <div id="members-grid" class="members-grid">
+            <!-- Members injected here -->
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/utils.js"></script>
+  <script>
+    async function loadMembers() {
+      const grid = document.getElementById('members-grid');
+      try {
+        const members = await API.getMembers();
+        if (members.length === 0) {
+          grid.innerHTML = `
+            <div class="empty-state card" style="grid-column: 1/-1;">
+              <h3>No team members yet</h3>
+              <p style="margin-top:0.5rem;">Add your first member using the form on the left to start allocating tasks!</p>
+            </div>`;
+          return;
+        }
+
+        grid.innerHTML = members.map(m => `
+          <div class="card member-card">
+            <div class="member-header">
+              ${renderMemberAvatar(m, 'avatar-lg')}
+              <div>
+                <h3 style="margin:0; font-size:1.1rem; color:#fff;">${m.name}</h3>
+                <span class="form-label" style="margin-bottom:0;">Joined ${relativeTime(m.created_at)}</span>
+              </div>
+            </div>
+            <p style="color:var(--text-muted); font-size:0.875rem; line-height:1.4;">${m.bio || 'No bio provided.'}</p>
+            <div>
+              <span class="form-label" style="font-size:0.75rem; text-transform:uppercase;">Skills & Stack:</span>
+              ${(m.skills || []).map(s => `<span class="skill-chip">${s}</span>`).join('')}
+              ${(!m.skills || m.skills.length === 0) ? `<span style="font-size:0.8rem; color:var(--text-muted); font-style:italic;">None detected yet</span>` : ''}
+            </div>
+            ${m.resume_path ? `<div style="font-size:0.75rem; color:var(--info);"><a href="${m.resume_path}" target="_blank" style="color:var(--info); text-decoration:none;">📄 View Uploaded Resume</a></div>` : ''}
+            <div class="member-actions">
+              <button class="btn" style="flex:1; font-size:0.8rem; padding:0.4rem;" onclick="extractSkills('${m.id}', this)">🤖 Extract Skills</button>
+              <button class="btn btn-danger" style="font-size:0.8rem; padding:0.4rem;" onclick="deleteMember('${m.id}')">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        showToast('Failed to load members: ' + err.message, 'error');
+      }
+    }
+
+    async function handleAddMember(e) {
+      e.preventDefault();
+      const form = e.target;
+      const btn = document.getElementById('btn-add-member');
+      const formData = new FormData(form);
+      
+      setLoading(btn, true);
+      try {
+        await API.createMember(formData);
+        showToast('Member added successfully!', 'success');
+        form.reset();
+        loadMembers();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        setLoading(btn, false, 'Create Member');
+      }
+    }
+
+    async function extractSkills(id, btn) {
+      setLoading(btn, true);
+      try {
+        const res = await API.extractSkills(id);
+        const count = (res.skills || []).length;
+        showToast(count > 0 ? `Extracted ${count} skills!` : 'No skills found in resume.', 'info');
+        loadMembers();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        setLoading(btn, false, '🤖 Extract Skills');
+      }
+    }
+
+    async function deleteMember(id) {
+      if (!confirm('Are you sure you want to remove this member?')) return;
+      try {
+        await API.deleteMember(id);
+        showToast('Member removed', 'success');
+        loadMembers();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    window.onload = loadMembers;
+  </script>
+</body>
+</html>

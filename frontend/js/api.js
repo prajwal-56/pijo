@@ -1,0 +1,47 @@
+// api.js — Centralized API Client for PIJO
+
+const API = {
+  base: '',
+
+  async _req(method, path, body = null, isForm = false) {
+    const opts = { method, headers: {} };
+    if (body) {
+      if (isForm) {
+        opts.body = body; // FormData handles its own boundary
+      } else {
+        opts.headers['Content-Type'] = 'application/json';
+        opts.body = JSON.stringify(body);
+      }
+    }
+    const res = await fetch(this.base + path, opts);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || 'Request failed');
+    }
+    return res.json();
+  },
+
+  // Members API
+  getMembers: () => API._req('GET', '/api/members/'),
+  getMember: (id) => API._req('GET', `/api/members/${id}`),
+  createMember: (formData) => API._req('POST', '/api/members/', formData, true),
+  deleteMember: (id) => API._req('DELETE', `/api/members/${id}`),
+  extractSkills: (id) => API._req('POST', `/api/members/${id}/extract-skills`),
+
+  // Tasks API
+  getTasks: () => API._req('GET', '/api/tasks/'),
+  createTask: (data) => API._req('POST', '/api/tasks/', data),
+  uploadTasksCSV: (formData) => API._req('POST', '/api/tasks/upload', formData, true),
+  updateTaskStatus: (id, status) => API._req('PATCH', `/api/tasks/${id}/status`, { status }),
+  assignTask: (id, member_id, reason = 'Manually assigned') => API._req('PATCH', `/api/tasks/${id}/assign`, { member_id, reason }),
+  aiAssign: () => API._req('POST', '/api/tasks/assign'),
+  aiPrioritize: () => API._req('POST', '/api/tasks/prioritize'),
+  deleteTask: (id) => API._req('DELETE', `/api/tasks/${id}`),
+  clearTasks: () => API._req('DELETE', '/api/tasks/'),
+
+  // AI Assistant API
+  chat: (message) => API._req('POST', '/api/ai/chat', { message }),
+  summary: () => API._req('GET', '/api/ai/summary'),
+};
+
+window.API = API;

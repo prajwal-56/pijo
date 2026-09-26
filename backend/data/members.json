@@ -1,0 +1,64 @@
+[
+  {
+    "id": "b0f17a5d-764f-46eb-a3c7-37299c8c1a9c",
+    "name": "Sarah Chen",
+    "bio": "Frontend & UI/UX Specialist",
+    "pfp": null,
+    "resume_path": "/uploads/b0f17a5d-764f-46eb-a3c7-37299c8c1a9c_resume.md",
+    "resume_text": "# Sarah Chen - Frontend & UI/UX Specialist\n\n## Summary\nFrontend engineer with 3+ years experience building interactive web applications, design systems, and responsive user interfaces.\n\n## Core Technical Skills\n- **Languages:** JavaScript (ES6+), TypeScript, HTML5, CSS3, Sass\n- **Frameworks & Libraries:** React, Vue.js, Tailwind CSS, Redux, Next.js\n- **Design & Tooling:** Figma, Webpack, Vite, Git, Storybook, Responsive Design\n- **Key Competencies:** UI/UX Design, Accessibility (a11y), Performance Optimization, Mobile-First Design\n\n## Projects & Experience\n- Built an interactive design system and dashboard UI in React & Figma.\n- Led front-end performance tuning reducing LCP by 45%.\n",
+    "skills": [
+      "JavaScript",
+      "TypeScript",
+      "React",
+      "Vue",
+      "Git",
+      "CSS",
+      "Tailwind",
+      "Figma",
+      "UI/UX"
+    ],
+    "created_at": "2026-09-26T07:14:18.118497+00:00"
+  },
+  {
+    "id": "1e1c472d-3cc4-4ef6-b700-5b118cdd2ffa",
+    "name": "David Rodriguez",
+    "bio": "Backend & Infrastructure Engineer",
+    "pfp": null,
+    "resume_path": "/uploads/1e1c472d-3cc4-4ef6-b700-5b118cdd2ffa_resume.md",
+    "resume_text": "# David Rodriguez - Backend & Infrastructure Engineer\n\n## Summary\nSoftware engineer specializing in high-throughput APIs, distributed systems, container orchestration, and relational database architecture.\n\n## Core Technical Skills\n- **Languages:** Python, Go, SQL, Bash\n- **Frameworks:** FastAPI, Django, Flask, Express\n- **Database & Storage:** PostgreSQL, Redis, MongoDB, Alembic\n- **DevOps & Cloud:** Docker, Kubernetes, AWS (ECS, S3, RDS), GitHub Actions CI/CD, Linux System Admin\n- **Security:** JWT Auth, OAuth2, RBAC, Data Encryption\n\n## Experience\n- Engineered microservices backend using FastAPI and PostgreSQL handling 50k requests/min.\n- Automated deployment workflows using Docker and CI/CD pipelines.\n",
+    "skills": [
+      "Python",
+      "FastAPI",
+      "Django",
+      "Flask",
+      "SQL",
+      "PostgreSQL",
+      "MongoDB",
+      "Docker",
+      "Kubernetes",
+      "AWS"
+    ],
+    "created_at": "2026-09-26T07:14:18.123938+00:00"
+  },
+  {
+    "id": "c308c21c-8931-451d-b935-e92aae8ca1e3",
+    "name": "Maya Patel",
+    "bio": "AI & ML Engineer",
+    "pfp": null,
+    "resume_path": "/uploads/c308c21c-8931-451d-b935-e92aae8ca1e3_resume.md",
+    "resume_text": "# Maya Patel - AI & Machine Learning Engineer\n\n## Summary\nAI researcher and software developer focusing on LLM integrations, prompt engineering, computer vision, and neural network architectures.\n\n## Core Technical Skills\n- **Languages:** Python, C++, R\n- **AI & ML Frameworks:** PyTorch, TensorFlow, Google Generative AI (Gemini), Hugging Face, LangChain, Scikit-Learn\n- **Data & APIs:** Pandas, NumPy, REST API, FastAPI, GraphQL\n- **Specializations:** Prompt Engineering, Semantic Search, Retrieval Augmented Generation (RAG), Fine-Tuning\n\n## Experience\n- Built generative AI pipeline integrating Gemini API for autonomous text summarization.\n- Designed vector embeddings search for document indexing.\n",
+    "skills": [
+      "Python",
+      "FastAPI",
+      "Machine Learning",
+      "AI",
+      "PyTorch",
+      "TensorFlow",
+      "Pandas",
+      "NumPy",
+      "GraphQL",
+      "REST API"
+    ],
+    "created_at": "2026-09-26T07:14:18.129886+00:00"
+  }
+]
