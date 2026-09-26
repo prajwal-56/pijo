@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Header
 from fastapi.responses import JSONResponse
 
 from storage import read_members, write_members, uploads_dir
@@ -13,13 +13,13 @@ router = APIRouter(prefix="/api/members", tags=["members"])
 
 
 @router.get("/")
-def list_members():
-    return read_members()
+def list_members(x_team_id: Optional[str] = Header(None, alias="X-Team-Id")):
+    return read_members(x_team_id)
 
 
 @router.get("/{member_id}")
-def get_member(member_id: str):
-    members = read_members()
+def get_member(member_id: str, x_team_id: Optional[str] = Header(None, alias="X-Team-Id")):
+    members = read_members(x_team_id)
     for m in members:
         if m["id"] == member_id:
             return m
@@ -32,6 +32,7 @@ async def create_member(
     bio: str = Form(default=""),
     pfp: Optional[UploadFile] = File(default=None),
     resume: Optional[UploadFile] = File(default=None),
+    x_team_id: Optional[str] = Header(None, alias="X-Team-Id"),
 ):
     member_id = str(uuid.uuid4())
     uploads = uploads_dir()
@@ -72,31 +73,31 @@ async def create_member(
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
-    members = read_members()
+    members = read_members(x_team_id)
     members.append(member)
-    write_members(members)
+    write_members(members, x_team_id)
 
     return member
 
 
 @router.delete("/{member_id}")
-def delete_member(member_id: str):
-    members = read_members()
+def delete_member(member_id: str, x_team_id: Optional[str] = Header(None, alias="X-Team-Id")):
+    members = read_members(x_team_id)
     new_members = [m for m in members if m["id"] != member_id]
     if len(new_members) == len(members):
         raise HTTPException(status_code=404, detail="Member not found")
-    write_members(new_members)
+    write_members(new_members, x_team_id)
     return {"ok": True}
 
 
 @router.post("/{member_id}/extract-skills")
-def re_extract_skills(member_id: str):
+def re_extract_skills(member_id: str, x_team_id: Optional[str] = Header(None, alias="X-Team-Id")):
     """Re-run AI skill extraction for a member."""
-    members = read_members()
+    members = read_members(x_team_id)
     for m in members:
         if m["id"] == member_id:
             skills = extract_skills(m.get("resume_text", ""))
             m["skills"] = skills
-            write_members(members)
+            write_members(members, x_team_id)
             return {"skills": skills}
     raise HTTPException(status_code=404, detail="Member not found")

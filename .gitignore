@@ -37,6 +37,8 @@ wheels/
 backend/data/*.json
 backend/data/uploads/*
 !backend/data/uploads/.gitkeep
+backend/data/teams/*
+!backend/data/teams/.gitkeep
 
 # OS generated files
 .DS_Store

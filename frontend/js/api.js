@@ -1,10 +1,21 @@
-// api.js — Centralized API Client for PIJO
+// api.js — Centralized API Client for PIJO with Multi-Team Workspace Support
+
+const urlParams = new URLSearchParams(window.location.search);
+const inviteTeam = urlParams.get('team');
+if (inviteTeam) {
+  localStorage.setItem('pijo_team_id', inviteTeam);
+}
 
 const API = {
   base: '',
+  currentTeamId: localStorage.getItem('pijo_team_id') || 'team-default',
 
   async _req(method, path, body = null, isForm = false) {
     const opts = { method, headers: {} };
+
+    // Attach active Team ID header on every request
+    opts.headers['X-Team-Id'] = this.currentTeamId;
+
     if (body) {
       if (isForm) {
         opts.body = body; // FormData handles its own boundary
@@ -21,14 +32,24 @@ const API = {
     return res.json();
   },
 
-  // Members API
+  // Teams Workspace API
+  getTeams: () => API._req('GET', '/api/teams/'),
+  getTeam: (id) => API._req('GET', `/api/teams/${id}`),
+  createTeam: (data) => API._req('POST', '/api/teams/', data),
+  deleteTeam: (id) => API._req('DELETE', `/api/teams/${id}`),
+  setCurrentTeam: (teamId) => {
+    API.currentTeamId = teamId;
+    localStorage.setItem('pijo_team_id', teamId);
+  },
+
+  // Members API (Scoped to active team)
   getMembers: () => API._req('GET', '/api/members/'),
   getMember: (id) => API._req('GET', `/api/members/${id}`),
   createMember: (formData) => API._req('POST', '/api/members/', formData, true),
   deleteMember: (id) => API._req('DELETE', `/api/members/${id}`),
   extractSkills: (id) => API._req('POST', `/api/members/${id}/extract-skills`),
 
-  // Tasks API
+  // Tasks API (Scoped to active team)
   getTasks: () => API._req('GET', '/api/tasks/'),
   createTask: (data) => API._req('POST', '/api/tasks/', data),
   uploadTasksCSV: (formData) => API._req('POST', '/api/tasks/upload', formData, true),
@@ -42,7 +63,7 @@ const API = {
   addColumn: (data) => API._req('POST', '/api/tasks/columns', data),
   deleteColumn: (id) => API._req('DELETE', `/api/tasks/columns/${id}`),
 
-  // AI Assistant API
+  // AI Assistant API (Scoped to active team)
   chat: (message) => API._req('POST', '/api/ai/chat', { message }),
   summary: () => API._req('GET', '/api/ai/summary'),
 };

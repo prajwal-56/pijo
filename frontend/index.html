@@ -65,8 +65,14 @@
 
       <!-- Landing Page Eye-Catching Hero Section -->
       <section class="hero-banner card-tilt">
-        <div class="hero-pill-badge">
-          <span>Autonomous Team Orchestrator</span>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.25rem;">
+          <div class="hero-pill-badge" style="margin-bottom:0;">
+            <span>Autonomous Team Orchestrator</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span class="badge badge-purple" id="page-team-name">Alpha Hackers</span>
+            <span class="badge badge-yellow" id="page-team-id-chip" onclick="copyTeamInviteLink()" style="cursor:pointer;" title="Click to copy team invite link">ID: team-default</span>
+          </div>
         </div>
         
         <h1 class="hero-title">
@@ -216,6 +222,7 @@
   <script src="/static/js/utils.js"></script>
   <script src="/static/js/effects.js"></script>
   <script src="/static/js/cursor.js"></script>
+  <script src="/static/js/teams.js"></script>
   <script>
     async function initDashboard() {
       try {

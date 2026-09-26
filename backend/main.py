@@ -16,6 +16,7 @@ load_dotenv()
 from routes.members import router as members_router
 from routes.tasks import router as tasks_router
 from routes.ai import router as ai_router
+from routes.teams import router as teams_router
 from storage import DATA_DIR
 
 app = FastAPI(title="PIJO API", version="1.0.0")
@@ -40,6 +41,7 @@ if frontend_path.exists():
     app.mount("/static", StaticFiles(directory=str(frontend_path)), name="static")
 
 # Include routers
+app.include_router(teams_router)
 app.include_router(members_router)
 app.include_router(tasks_router)
 app.include_router(ai_router)
